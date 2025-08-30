@@ -1,70 +1,58 @@
-import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../utils/db';
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../utils/db";
 
 class User extends Model {
-    public id!: number;
-    public username!: string;
-    public firstName!: string;
-    public lastName!: string;
-    public birthDate!: Date;
-    public email!: string;
-    public passwordHash!: string;
-    public createdAt!: Date;
-    public updatedAt!: Date;
-};
+  public id!: number;
+  public username!: string;
+  public firstName!: string;
+  public lastName!: string;
+  public birthDate!: Date;
+  public email!: string;
+  public passwordHash!: string;
+}
 
 User.init(
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        username: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        },
-        firstName: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        lastName: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        birthDate: {
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        email: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-            validate: {
-                isEmail: true
-            }
-        },
-        passwordHash: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        createdAt: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: Date.now()
-        },
-        updatedAt: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: Date.now()
-        }
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    {
-        sequelize,
-        modelName: 'user',
-        underscored: true
-    }
-)
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    birthDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    passwordHash: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize,
+    modelName: "user",
+    underscored: true,
+  }
+);
 
 export default User;

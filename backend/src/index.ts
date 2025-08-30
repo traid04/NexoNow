@@ -3,6 +3,8 @@ import { PORT } from './utils/config';
 import { initializeDB } from './utils/db';
 const app = express();
 
+app.use(express.json());
+
 app.listen(PORT, async () => {
     try {
         await initializeDB();
