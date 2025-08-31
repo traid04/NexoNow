@@ -1,16 +1,18 @@
-import express from 'express';
-import { PORT } from './utils/config';
-import { initializeDB } from './utils/db';
+import express from "express";
+import { PORT } from "./utils/config";
+import { initializeDB } from "./utils/db";
+import userRouter from "./routes/users";
 const app = express();
 
 app.use(express.json());
 
+app.use("/api/users", userRouter);
+
 app.listen(PORT, async () => {
-    try {
-        await initializeDB();
-    }
-    catch(error) {
-        console.log(error);
-    }
-    console.log(`Listening to PORT: ${PORT}`);
-})
+  try {
+    await initializeDB();
+  } catch (error) {
+    console.log(error);
+  }
+  console.log(`Listening to PORT: ${PORT}`);
+});

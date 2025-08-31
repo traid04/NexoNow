@@ -6,7 +6,7 @@ class User extends Model {
   public username!: string;
   public firstName!: string;
   public lastName!: string;
-  public birthDate!: Date;
+  public birthDate!: string;
   public email!: string;
   public passwordHash!: string;
 }
@@ -32,7 +32,7 @@ User.init(
       allowNull: false,
     },
     birthDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     email: {

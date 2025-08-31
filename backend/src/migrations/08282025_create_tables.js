@@ -22,7 +22,7 @@ module.exports = {
         allowNull: false,
       },
       birth_date: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       email: {

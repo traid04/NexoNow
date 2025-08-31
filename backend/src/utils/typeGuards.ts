@@ -1,0 +1,7 @@
+export const isString = (str: unknown): str is string => {
+  return typeof str === "string" || str instanceof String;
+};
+
+export const isDate = (date: string): boolean => {
+  return !isNaN(Date.parse(date));
+}
