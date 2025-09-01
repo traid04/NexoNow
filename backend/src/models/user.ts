@@ -2,13 +2,15 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../utils/db";
 
 class User extends Model {
-  public id!: number;
-  public username!: string;
-  public firstName!: string;
-  public lastName!: string;
-  public birthDate!: string;
-  public email!: string;
-  public passwordHash!: string;
+  declare id: number;
+  declare username: string;
+  declare firstName: string;
+  declare lastName: string;
+  declare birthDate: string;
+  declare email: string;
+  declare passwordHash: string;
+  declare isVerified: boolean;
+  declare verifyToken: string;
 }
 
 User.init(
@@ -42,6 +44,15 @@ User.init(
       validate: {
         isEmail: true,
       },
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
+    verifyToken: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
     passwordHash: {
       type: DataTypes.STRING,

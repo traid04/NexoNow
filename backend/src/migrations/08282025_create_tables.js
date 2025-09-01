@@ -30,6 +30,15 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      is_verified: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      verify_token: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       password_hash: {
         type: DataTypes.STRING,
         allowNull: false,

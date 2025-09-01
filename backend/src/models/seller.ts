@@ -3,13 +3,13 @@ import { sequelize } from "../utils/db";
 import { User } from "./index";
 
 class Seller extends Model {
-  public id!: number;
-  public userId!: number;
-  public department!: string;
-  public city!: string;
-  public address!: string;
-  public floorOrApartment!: string;
-  public phoneNumber!: string;
+  declare id: number;
+  declare userId: number;
+  declare department: string;
+  declare city: string;
+  declare address: string;
+  declare floorOrApartment: string;
+  declare phoneNumber: string;
 }
 
 Seller.init(

@@ -3,8 +3,8 @@ import { sequelize } from "../utils/db";
 import { Product, Category } from "./index";
 
 class ProductCategory extends Model {
-  public productId!: number;
-  public categoryId!: number;
+  declare productId: number;
+  declare categoryId: number;
 }
 
 ProductCategory.init(

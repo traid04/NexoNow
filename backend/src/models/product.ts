@@ -3,18 +3,18 @@ import { sequelize } from "../utils/db";
 import { Seller } from "./index";
 
 class Product extends Model {
-  public id!: number;
-  public sellerId!: number;
-  public name!: string;
-  public price!: string;
-  public offerPrice!: number;
-  public startOfferDate!: Date;
-  public endOfferDate!: Date;
-  public description!: string;
-  public images!: string[];
-  public stock!: number;
-  public location!: string;
-  public category!: string;
+  declare id: number;
+  declare sellerId: number;
+  declare name: string;
+  declare price: string;
+  declare offerPrice: number;
+  declare startOfferDate: Date;
+  declare endOfferDate: Date;
+  declare description: string;
+  declare images: string[];
+  declare stock: number;
+  declare location: string;
+  declare category: string;
 }
 
 Product.init(
