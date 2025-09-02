@@ -11,25 +11,35 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export const sendVerificationMail = async (name: string, email: string, token: string) : Promise<void> => {
+export const sendVerificationMail = async (name: string, email: string, token: string, firstSend: boolean) : Promise<void> => {
   try {
+    let message;
+    let title;
+    if (firstSend) {
+      message = 'Tu cuenta de NexoNow ha sido creada correctamente. Solo debes hacer click en el botón para verificarla (Válido por un día):';
+      title = 'Verifica tu cuenta';
+    }
+    else {
+      message = 'Parece que tu enlace anterior ha expirado. Haz click en el siguiente botón para verificar tu cuenta (Válido por un día):';
+      title = 'Reenvío de Token';
+    }
     const mail = await transporter.sendMail({
       from: `"NexoNow" <${EMAIL_USER}>`,
       to: email,
-      subject: "Verifica tu cuenta",
-      text: `Hola ${name}, verifica tu cuenta aquí: ${PAGE_URL}/verify/${token}`,
+      subject: `${title}`,
+      text: `Hola ${name}, verifica tu cuenta aquí: ${PAGE_URL}/api/users/verify/${token}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 600px; margin: auto;">
           <h2 style="color: #0078D4;">¡Hola ${name}!</h2>
           <p>
-            Tu cuenta de NexoNow ha sido creada correctamente. Solo debes hacer click en el botón para verificarla:
+            ${message}
           </p>
-          <a href="${PAGE_URL}/verify/${token}" style="display: inline-block; padding: 10px 20px; background-color: #0078D4; color: white; text-decoration: none; border-radius: 5px;">
+          <a href="${PAGE_URL}/api/users/verify/${token}" style="display: inline-block; padding: 10px 20px; background-color: #0078D4; color: white; text-decoration: none; border-radius: 5px;">
             Verificar Cuenta
           </a>
           <p>
             Si no creaste esta cuenta, simplemente ignora este correo.
-          </p> 
+          </p>
         </div>
       `
     });

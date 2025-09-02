@@ -8,3 +8,11 @@ export interface NewUserEntry {
 }
 
 export type SecureNewUserEntry = Omit<NewUserEntry, "email" | "password">;
+
+export interface NewVerifyUserEntry {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export type LoginUserEntry = Omit<NewVerifyUserEntry, 'username'>

@@ -5,3 +5,7 @@ export const isString = (str: unknown): str is string => {
 export const isDate = (date: string): boolean => {
   return !isNaN(Date.parse(date));
 }
+
+export const isObject = (obj: unknown): obj is object => {
+  return typeof obj === 'object';
+}

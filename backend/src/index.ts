@@ -2,11 +2,14 @@ import express from "express";
 import { PORT } from "./utils/config";
 import { initializeDB } from "./utils/db";
 import userRouter from "./routes/users";
+import { errorHandler } from "./middleware/errorHandler";
 const app = express();
 
 app.use(express.json());
 
 app.use("/api/users", userRouter);
+
+app.use(errorHandler);
 
 app.listen(PORT, async () => {
   try {
