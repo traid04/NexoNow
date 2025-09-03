@@ -1,3 +1,6 @@
+import { Request } from "express";
+import { JwtPayload } from "jsonwebtoken";
+
 export interface NewUserEntry {
   username: string;
   firstName: string;
@@ -15,4 +18,8 @@ export interface NewVerifyUserEntry {
   password: string;
 }
 
-export type LoginUserEntry = Omit<NewVerifyUserEntry, 'username'>
+export type LoginUserEntry = Omit<NewVerifyUserEntry, 'username'>;
+
+export interface RequestWithUser extends Request {
+  user?: JwtPayload;
+}

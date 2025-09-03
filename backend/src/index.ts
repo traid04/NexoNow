@@ -4,6 +4,7 @@ import { initializeDB } from "./utils/db";
 import userRouter from "./routes/users";
 import loginRouter from "./routes/login";
 import refreshRouter from "./routes/refresh";
+import logoutRouter from "./routes/logout";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 const app = express();
@@ -14,6 +15,7 @@ app.use(cookieParser(COOKIE_TOP_SECRET_KEY));
 app.use("/api/users", userRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/refresh", refreshRouter);
+app.use("/api/logout", logoutRouter);
 
 app.use(errorHandler);
 

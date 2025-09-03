@@ -11,6 +11,7 @@ router.post("/", async (req, res, next) => {
   }
   try {
     const decodedToken = jsonwebtoken.verify(req.signedCookies.refreshToken, JWT_TOP_SECRET_KEY);
+    console.log(decodedToken);
     if (!(isObject(decodedToken) && 'userId' in decodedToken && 'email' in decodedToken)) {
       return res.status(400).json({ error: 'Invalid Token structure' });
     }
@@ -24,7 +25,7 @@ router.post("/", async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found, invalid Token' });
     }
-    const newAccessToken = jsonwebtoken.sign({ userId: user.id }, JWT_TOP_SECRET_KEY, { expiresIn: '1h' });
+    const newAccessToken = jsonwebtoken.sign({ userId: user.id }, JWT_TOP_SECRET_KEY, { expiresIn: '15m' });
     const newRefreshToken = jsonwebtoken.sign({ userId: user.id, email: user.email }, JWT_TOP_SECRET_KEY, { expiresIn: '7d' });
     res.cookie("refreshToken", newRefreshToken, { signed: true, secure: true, httpOnly: true, path: "/api/refresh", sameSite: "strict" });
     user.refreshToken = newRefreshToken;
