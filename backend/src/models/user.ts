@@ -11,6 +11,7 @@ class User extends Model {
   declare passwordHash: string;
   declare isVerified: boolean;
   declare verifyToken: string;
+  declare refreshToken: string;
 }
 
 User.init(
@@ -58,6 +59,10 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    refreshToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   },
   {
     sequelize,

@@ -43,6 +43,10 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      refresh_token: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,

@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry } from "../types/types";
 import { isString, isDate } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
@@ -32,7 +32,7 @@ export const parseNewUserEntry = (user: unknown): NewUserEntry => {
   throw new Error("Invalid Data: Some fields are missing");
 };
 
-export const parseLoginUserEntry = (user: unknown): NewVerifyUserEntry => {
+export const parseVerifyUserEntry = (user: unknown): NewVerifyUserEntry => {
   if (!user || typeof user !== 'object') {
     throw new Error('Invalid User: Object expected');
   }
@@ -44,4 +44,17 @@ export const parseLoginUserEntry = (user: unknown): NewVerifyUserEntry => {
     }
   }
   throw new Error("Invalid Data: Some fields are missing");
-}
+};
+
+export const parseLoginUserEntry = (user: unknown): LoginUserEntry => {
+  if (!user || typeof user !== 'object') {
+    throw new Error('Invalid User: Object expected');
+  }
+  if ('email' in user && 'password' in user) {
+    return {
+      email: parseString(user.email),
+      password: parseString(user.password)
+    }
+  }
+  throw new Error("Invalid Data: Some fields are missing");
+};

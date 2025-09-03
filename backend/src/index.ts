@@ -1,20 +1,27 @@
 import express from "express";
-import { PORT } from "./utils/config";
+import { PORT, COOKIE_TOP_SECRET_KEY } from "./utils/config";
 import { initializeDB } from "./utils/db";
 import userRouter from "./routes/users";
+import loginRouter from "./routes/login";
+import refreshRouter from "./routes/refresh";
 import { errorHandler } from "./middleware/errorHandler";
+import cookieParser from "cookie-parser";
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser(COOKIE_TOP_SECRET_KEY));
 
 app.use("/api/users", userRouter);
+app.use("/api/login", loginRouter);
+app.use("/api/refresh", refreshRouter);
 
 app.use(errorHandler);
 
 app.listen(PORT, async () => {
   try {
     await initializeDB();
-  } catch (error) {
+  }
+  catch (error) {
     console.log(error);
   }
   console.log(`Listening to PORT: ${PORT}`);
