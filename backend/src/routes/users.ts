@@ -1,19 +1,31 @@
-import { User } from "../models/index";
+import { Seller, User } from "../models/index";
 import express, { Router } from "express";
-import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry } from "../types/types";
+import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
 import { parseVerifyUserEntry, parseNewUserEntry } from "../utils/parseInputs";
 import bcrypt from "bcrypt";
 import { JWT_TOP_SECRET_KEY } from "../utils/config";
 import jsonwebtoken from 'jsonwebtoken';
 import { sendVerificationMail } from "../services/mailService";
 import { isObject } from "../utils/typeGuards";
+import { tokenExtractor } from "../middleware/tokenExtractor";
 const router: Router = express.Router();
 
-router.get("/", async (_req, res) => {
-  const users = await User.findAll({
-    attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"]
-  });
-  res.status(200).json(users);
+router.get("/", async (_req, res, next) => {
+  try {
+    const users = await User.findAll({
+      attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"],
+      include: {
+        model: Seller,
+        attributes: {
+          exclude: ['userId', 'createdAt', 'updatedAt']
+        }
+      }
+    })
+    return res.status(200).json(users);
+  }
+  catch(error) {
+    next(error);
+  }
 });
 
 router.post("/", async (req, res) => {
@@ -53,6 +65,32 @@ router.post("/", async (req, res) => {
     }
   }
 });
+
+router.delete('/:id', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token not found' });
+  }
+  try {
+    if (Number(req.params.id) !== Number(req.user.userId)) {
+      return res.status(401).json({ error: 'Cannot delete a different account than yours' });
+    }
+    if (isNaN(Number(req.params.id))) {
+      return res.status(400).json({ error: 'Invalid User ID' });
+    }
+    const deletedCount = await User.destroy({
+      where: {
+        id: Number(req.params.id),
+      }
+    })
+    if (deletedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(204).end();
+  }
+  catch(error) {
+    next(error);
+  }
+})
 
 router.get('/verify/:token', async (req, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {

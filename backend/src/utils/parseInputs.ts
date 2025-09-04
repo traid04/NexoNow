@@ -1,5 +1,5 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry } from "../types/types";
-import { isString, isDate } from "./typeGuards";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry } from "../types/types";
+import { isString, isDate, isNumber } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
   if (!str || !isString(str)) {
@@ -14,6 +14,13 @@ const parseDate = (date: unknown): string => {
   }
   return date;
 };
+
+const parseNumber = (num: unknown): number => {
+  if (!num || typeof num !== 'number' || !isNumber(num)) {
+    throw new Error("Invalid or undefined data: Number expected");
+  }
+  return num;
+}
 
 export const parseNewUserEntry = (user: unknown): NewUserEntry => {
   if (!user || typeof user !== "object") {
@@ -55,6 +62,28 @@ export const parseLoginUserEntry = (user: unknown): LoginUserEntry => {
       email: parseString(user.email),
       password: parseString(user.password)
     }
+  }
+  throw new Error("Invalid Data: Some fields are missing");
+};
+
+export const parseNewSellerEntry = (seller: unknown): NewSellerEntry => {
+  if (!seller || typeof seller !== 'object') {
+    throw new Error('Invalid Seller: Object expected');
+  }
+  if ('userId' in seller && 'department' in seller && 'city' in seller && 'address' in seller) {
+    let parsedSeller: NewSellerEntry = {
+      userId: parseNumber(seller.userId),
+      department: parseString(seller.department),
+      city: parseString(seller.city),
+      address: parseString(seller.address),
+    }
+    if ('floorOrApartment' in seller) {
+      parsedSeller.floorOrApartment = parseString(seller.floorOrApartment);
+    }
+    if ('phoneNumber' in seller) {
+      parsedSeller.phoneNumber = parseString(seller.phoneNumber);
+    }
+    return parsedSeller;
   }
   throw new Error("Invalid Data: Some fields are missing");
 };

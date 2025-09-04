@@ -23,3 +23,12 @@ export type LoginUserEntry = Omit<NewVerifyUserEntry, 'username'>;
 export interface RequestWithUser extends Request {
   user?: JwtPayload;
 }
+
+export type NewSellerEntry = {
+  userId: number;
+  department: string;
+  city: string;
+  address: string;
+  floorOrApartment?: string;
+  phoneNumber?: string;
+}

@@ -9,3 +9,7 @@ export const isDate = (date: string): boolean => {
 export const isObject = (obj: unknown): obj is object => {
   return typeof obj === 'object';
 }
+
+export const isNumber = (num: unknown): num is number => {
+  return typeof num === 'number';
+}

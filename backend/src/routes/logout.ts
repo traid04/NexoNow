@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/', tokenExtractor, async (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(400).json({ error: 'Token not found' });
+    return res.status(401).json({ error: 'Token not found' });
   }
   try {
     const user = await User.findByPk(req.user.userId);
