@@ -1,11 +1,11 @@
 import { Seller, User } from "../models/index";
 import express, { Router } from "express";
 import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
-import { parseVerifyUserEntry, parseNewUserEntry } from "../utils/parseInputs";
+import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataInput, parseEmailChange, parsePasswordChange } from "../utils/parseInputs";
 import bcrypt from "bcrypt";
 import { JWT_TOP_SECRET_KEY } from "../utils/config";
 import jsonwebtoken from 'jsonwebtoken';
-import { sendVerificationMail } from "../services/mailService";
+import { sendChangeMail, sendVerificationMail } from "../services/mailService";
 import { isObject } from "../utils/typeGuards";
 import { tokenExtractor } from "../middleware/tokenExtractor";
 const router: Router = express.Router();
@@ -28,7 +28,7 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
@@ -56,30 +56,22 @@ router.post("/", async (req, res) => {
     await sendVerificationMail(userToAdd.firstName, userToAdd.email, verifyToken, true);
     return res.status(201).json(user);
   }
-  catch(error: unknown) {
-    if (error instanceof Error) {
-      return res.status(400).json({ error: error.message });
-    }
-    else {
-      return res.status(400).json({ error: `Unknown error: ${error}` });
-    }
+  catch(error) {
+    next(error);
   }
 });
 
-router.delete('/:id', tokenExtractor, async (req: RequestWithUser, res, next) => {
+router.delete('/me', tokenExtractor, async (req: RequestWithUser, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Token not found' });
+    return res.status(401).json({ error: 'Token missing or invalid' });
   }
   try {
-    if (Number(req.params.id) !== Number(req.user.userId)) {
-      return res.status(401).json({ error: 'Cannot delete a different account than yours' });
-    }
-    if (isNaN(Number(req.params.id))) {
+    if (isNaN(req.user.userId)) {
       return res.status(400).json({ error: 'Invalid User ID' });
     }
     const deletedCount = await User.destroy({
       where: {
-        id: Number(req.params.id),
+        id: req.user.userId
       }
     })
     if (deletedCount === 0) {
@@ -90,7 +82,127 @@ router.delete('/:id', tokenExtractor, async (req: RequestWithUser, res, next) =>
   catch(error) {
     next(error);
   }
-})
+});
+
+router.patch('/me', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  try {
+    const newUpdate = parseUpdateBasicDataInput(req.body);
+    const [updatedCount] = await User.update(
+      newUpdate,
+      {
+        where: {
+          id: req.user.userId
+        }
+      }
+    )
+    if (updatedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const userUpdated = await User.findByPk(req.user.userId, { attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"] });
+    return res.status(200).json(userUpdated);
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.post('/me/change-email', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  if (!JWT_TOP_SECRET_KEY) {
+    return res.status(400).json({ error: "JWT secret key cannot be undefined" });
+  }
+  try {
+    const newEmail = parseEmailChange(req.body).email;
+    const user = await User.findByPk(req.user.userId);
+    if (!user || !('firstName' in user && 'email' in user)) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const token = jsonwebtoken.sign({ username: user.username, actualEmail:user.email, newEmail }, JWT_TOP_SECRET_KEY, { expiresIn: '10m' });
+    await sendChangeMail(user.firstName, user.email, token, 'changeEmail');
+    return res.status(200).json({ message: 'Change email successfully sent' });
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.get('/me/change-email/:token', async (req, res, next) => {
+  if (!JWT_TOP_SECRET_KEY) {
+    return res.status(400).json({ error: "JWT secret key cannot be undefined" });
+  }
+  try {
+    const decodedToken = jsonwebtoken.verify(req.params.token, JWT_TOP_SECRET_KEY);
+    if (!isObject(decodedToken) || !('username' in decodedToken && 'actualEmail' in decodedToken && 'newEmail' in decodedToken)) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    const [updatedCount] = await User.update({ email: decodedToken.newEmail }, {
+      where: {
+        username: decodedToken.username,
+        email: decodedToken.actualEmail
+      }
+    })
+    if (updatedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(200).json({ message: 'Email changed successfully' });
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.post('/me/change-password', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  if (!JWT_TOP_SECRET_KEY) {
+    return res.status(400).json({ error: "JWT secret key cannot be undefined" });
+  }
+  try {
+    const newPassword = parsePasswordChange(req.body).password;
+    const user = await User.findByPk(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found, invalid Token' });
+    }
+    const token = jsonwebtoken.sign({ username: user?.username, actualPassword: user?.passwordHash, newPassword }, JWT_TOP_SECRET_KEY, { expiresIn: '10m' });
+    await sendChangeMail(user.firstName, user.email, token, 'changePassword');
+    return res.status(200).json({ message: 'Change Password mail successfully sent' });
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.get('/me/change-password/:token', async (req, res, next) => {
+  if (!JWT_TOP_SECRET_KEY) {
+    return res.status(400).json({ error: "JWT secret key cannot be undefined" });
+  }
+  try {
+    const decodedToken = jsonwebtoken.verify(req.params.token, JWT_TOP_SECRET_KEY);
+    if (!isObject(decodedToken) || !('username' in decodedToken && 'actualPassword' in decodedToken && 'newPassword' in decodedToken)) {
+      return res.status(400).json({ error: 'Invalid Token structure' });
+    }
+    const newPasswordHash = await bcrypt.hash(decodedToken.newPassword, 10);
+    const [updatedCount] = await User.update({ passwordHash: newPasswordHash }, {
+      where: {
+        username: decodedToken.username,
+        passwordHash: decodedToken.actualPassword
+      }
+    });
+    if (updatedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(200).json({ message: 'Password changed successfully' });
+  }
+  catch(error) {
+    next(error);
+  }
+});
 
 router.get('/verify/:token', async (req, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {

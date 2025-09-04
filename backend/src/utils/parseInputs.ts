@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
@@ -87,3 +87,47 @@ export const parseNewSellerEntry = (seller: unknown): NewSellerEntry => {
   }
   throw new Error("Invalid Data: Some fields are missing");
 };
+
+export const parseUpdateBasicDataInput = (entry: unknown): UpdateBasicDataEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid User: Object expected');
+  }
+  let parsedUpdate: UpdateBasicDataEntry = {};
+  if ('username' in entry) {
+    parsedUpdate.username = parseString(entry.username);
+  }
+  if ('firstName' in entry) {
+    parsedUpdate.firstName = parseString(entry.firstName);
+  }
+  if ('lastName' in entry) {
+    parsedUpdate.lastName = parseString(entry.lastName);
+  }
+  if ('birthDate' in entry) {
+    parsedUpdate.birthDate = parseString(entry.birthDate);
+  }
+  return parsedUpdate;
+};
+
+export const parseEmailChange = (email: unknown): UpdateEmailEntry => {
+  if (!email || typeof email !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  if ('email' in email) {
+    return {
+      email: parseString(email.email)
+    }
+  }
+  throw new Error('Undefined Email');
+}
+
+export const parsePasswordChange = (pass: unknown): UpdatePasswordEntry => {
+  if (!pass || typeof pass !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  if ('password' in pass) {
+    return {
+      password: parseString(pass.password)
+    }
+  }
+  throw new Error('Undefined Password');
+}

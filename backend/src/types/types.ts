@@ -32,3 +32,18 @@ export type NewSellerEntry = {
   floorOrApartment?: string;
   phoneNumber?: string;
 }
+
+export type UpdateBasicDataEntry = {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  birthDate?: string;
+}
+
+export interface UpdateEmailEntry {
+  email: string;
+}
+
+export interface UpdatePasswordEntry {
+  password: string;
+}

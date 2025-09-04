@@ -28,7 +28,7 @@ router.get('/', async (_req, res, next) => {
 
 router.post('/', tokenExtractor, async (req: RequestWithUser, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Token not found' });
+    return res.status(401).json({ error: 'Token missing or invalid' });
   }
   try {
     const newSeller: NewSellerEntry = parseNewSellerEntry({...req.body, userId: req.user.userId});
@@ -43,7 +43,7 @@ router.post('/', tokenExtractor, async (req: RequestWithUser, res, next) => {
 router.delete('/:id', tokenExtractor, async (req: RequestWithUser, res, next) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Token not found' });
+      return res.status(401).json({ error: 'Token missing or invalid' });
     }
     if (isNaN(Number(req.params.id))) {
       return res.status(400).json({ error: 'Invalid User ID' });
