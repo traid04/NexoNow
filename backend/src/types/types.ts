@@ -47,3 +47,11 @@ export interface UpdateEmailEntry {
 export interface UpdatePasswordEntry {
   password: string;
 }
+
+export type UpdateSellerDataEntry = {
+  department?: string;
+  city?: string;
+  address?: string;
+  floorOrApartment?: string | null;
+  phoneNumber?: string;
+}

@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
@@ -88,7 +88,7 @@ export const parseNewSellerEntry = (seller: unknown): NewSellerEntry => {
   throw new Error("Invalid Data: Some fields are missing");
 };
 
-export const parseUpdateBasicDataInput = (entry: unknown): UpdateBasicDataEntry => {
+export const parseUpdateBasicDataEntry = (entry: unknown): UpdateBasicDataEntry => {
   if (!entry || typeof entry !== 'object') {
     throw new Error('Invalid User: Object expected');
   }
@@ -108,7 +108,7 @@ export const parseUpdateBasicDataInput = (entry: unknown): UpdateBasicDataEntry 
   return parsedUpdate;
 };
 
-export const parseEmailChange = (email: unknown): UpdateEmailEntry => {
+export const parseEmailChangeEntry = (email: unknown): UpdateEmailEntry => {
   if (!email || typeof email !== 'object') {
     throw new Error('Invalid Data: Object expected');
   }
@@ -120,7 +120,7 @@ export const parseEmailChange = (email: unknown): UpdateEmailEntry => {
   throw new Error('Undefined Email');
 }
 
-export const parsePasswordChange = (pass: unknown): UpdatePasswordEntry => {
+export const parsePasswordChangeEntry = (pass: unknown): UpdatePasswordEntry => {
   if (!pass || typeof pass !== 'object') {
     throw new Error('Invalid Data: Object expected');
   }
@@ -130,4 +130,32 @@ export const parsePasswordChange = (pass: unknown): UpdatePasswordEntry => {
     }
   }
   throw new Error('Undefined Password');
+}
+
+export const parseUpdateSellerDataEntry = (entry: unknown): UpdateSellerDataEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  let fieldsToUpdate: UpdateSellerDataEntry = {};
+  if ('department' in entry) {
+    fieldsToUpdate.department = parseString(entry.department);
+  }
+  if ('city' in entry) {
+    fieldsToUpdate.city = parseString(entry.city);
+  }
+  if ('address' in entry) {
+    fieldsToUpdate.address = parseString(entry.address);
+  }
+  if ('floorOrApartment' in entry) {
+    if (typeof entry.floorOrApartment === 'string') {
+      fieldsToUpdate.floorOrApartment = parseString(entry.floorOrApartment);
+    }
+    if (entry.floorOrApartment === null) {
+      fieldsToUpdate.floorOrApartment = null;
+    }
+  }
+  if ('phoneNumber' in entry) {
+    fieldsToUpdate.phoneNumber = parseString(entry.phoneNumber);
+  }
+  return fieldsToUpdate;
 }

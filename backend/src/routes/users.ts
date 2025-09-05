@@ -1,7 +1,7 @@
 import { Seller, User } from "../models/index";
 import express, { Router } from "express";
 import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
-import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataInput, parseEmailChange, parsePasswordChange } from "../utils/parseInputs";
+import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataEntry, parseEmailChangeEntry, parsePasswordChangeEntry } from "../utils/parseInputs";
 import bcrypt from "bcrypt";
 import { JWT_TOP_SECRET_KEY } from "../utils/config";
 import jsonwebtoken from 'jsonwebtoken';
@@ -22,6 +22,30 @@ router.get("/", async (_req, res, next) => {
       }
     })
     return res.status(200).json(users);
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.get("/:id", async (req, res, next) => {
+  if (isNaN(Number(req.params.id))) {
+    return res.status(400).json({ error: 'User ID must be a number' });
+  }
+  try {
+    const user = await User.findByPk(Number(req.params.id), {
+      attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"],
+      include: {
+        model: Seller,
+        attributes: {
+          exclude: ['userId', 'createdAt', 'updatedAt']
+        }
+      }
+    });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(200).json(user);
   }
   catch(error) {
     next(error);
@@ -89,7 +113,7 @@ router.patch('/me', tokenExtractor, async (req: RequestWithUser, res, next) => {
     return res.status(401).json({ error: 'Token missing or invalid' });
   }
   try {
-    const newUpdate = parseUpdateBasicDataInput(req.body);
+    const newUpdate = parseUpdateBasicDataEntry(req.body);
     const [updatedCount] = await User.update(
       newUpdate,
       {
@@ -117,7 +141,7 @@ router.post('/me/change-email', tokenExtractor, async (req: RequestWithUser, res
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
   try {
-    const newEmail = parseEmailChange(req.body).email;
+    const newEmail = parseEmailChangeEntry(req.body).email;
     const user = await User.findByPk(req.user.userId);
     if (!user || !('firstName' in user && 'email' in user)) {
       return res.status(404).json({ error: 'User not found' });
@@ -164,7 +188,7 @@ router.post('/me/change-password', tokenExtractor, async (req: RequestWithUser, 
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
   try {
-    const newPassword = parsePasswordChange(req.body).password;
+    const newPassword = parsePasswordChangeEntry(req.body).password;
     const user = await User.findByPk(req.user.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found, invalid Token' });
