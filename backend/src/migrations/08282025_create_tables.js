@@ -8,6 +8,10 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
+      avatar_photo: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       username: {
         type: DataTypes.STRING,
         allowNull: false,

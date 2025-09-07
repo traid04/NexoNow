@@ -12,6 +12,7 @@ class User extends Model {
   declare isVerified: boolean;
   declare verifyToken: string;
   declare refreshToken: string;
+  declare avatarPhoto: string;
 }
 
 User.init(
@@ -20,6 +21,10 @@ User.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+    },
+    avatarPhoto: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
     username: {
       type: DataTypes.STRING,

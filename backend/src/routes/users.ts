@@ -8,12 +8,19 @@ import jsonwebtoken from 'jsonwebtoken';
 import { sendChangeMail, sendVerificationMail } from "../services/mailService";
 import { isObject } from "../utils/typeGuards";
 import { tokenExtractor } from "../middleware/tokenExtractor";
+import { fileFilter, uploadAvatar } from "../services/imageUploadService";
+import multer from 'multer';
 const router: Router = express.Router();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter
+});
 
 router.get("/", async (_req, res, next) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"],
+      attributes: ["id", "avatarPhoto", "username", "firstName", "lastName", "birthDate", "email"],
       include: {
         model: Seller,
         attributes: {
@@ -52,15 +59,23 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", upload.single('avatarPhoto'), async (req, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
   try {
+    if (!req.file) {
+      return res.status(401).json({ error: "The profile picture is required" });
+    }
+    const avatar = await uploadAvatar(req.file);
+    if (!avatar) {
+      return res.status(400).json({ error: "Error uploading profile picture" })
+    }
     const userEntry: NewUserEntry = parseNewUserEntry(req.body);
     const passwordHash = await bcrypt.hash(userEntry.password, 10);
     const verifyToken = jsonwebtoken.sign({ email: userEntry.email }, JWT_TOP_SECRET_KEY, { expiresIn:'1d' });
     const userToAdd = {
+      avatarPhoto: avatar.secure_url,
       username: userEntry.username,
       firstName: userEntry.firstName,
       lastName: userEntry.lastName,
@@ -72,6 +87,7 @@ router.post("/", async (req, res, next) => {
     }
     await User.create(userToAdd);
     const user: SecureNewUserEntry = {
+      avatarPhoto: userToAdd.avatarPhoto,
       username: userToAdd.username,
       firstName: userToAdd.firstName,
       lastName: userToAdd.lastName,

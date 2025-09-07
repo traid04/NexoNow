@@ -10,7 +10,7 @@ export interface NewUserEntry {
   password: string;
 }
 
-export type SecureNewUserEntry = Omit<NewUserEntry, "email" | "password">;
+export type SecureNewUserEntry = Omit<NewUserEntry, "email" | "password"> & { avatarPhoto: string };
 
 export interface NewVerifyUserEntry {
   username: string;
