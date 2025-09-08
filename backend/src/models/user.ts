@@ -13,6 +13,7 @@ class User extends Model {
   declare verifyToken: string;
   declare refreshToken: string;
   declare avatarPhoto: string;
+  declare avatarId: string;
 }
 
 User.init(
@@ -21,6 +22,10 @@ User.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+    },
+    avatarId: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
     avatarPhoto: {
       type: DataTypes.STRING,

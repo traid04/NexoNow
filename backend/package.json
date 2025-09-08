@@ -12,8 +12,8 @@
     "rollback": "ts-node ./src/utils/rollback.ts"
   },
   "dependencies": {
-    "@types/nodemailer": "^7.0.1",
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -27,6 +27,7 @@
     "umzug": "^3.8.2"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",

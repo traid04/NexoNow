@@ -55,3 +55,7 @@ export type UpdateSellerDataEntry = {
   floorOrApartment?: string | null;
   phoneNumber?: string;
 }
+
+export interface AvatarDestroyResponse {
+  result: string;
+}

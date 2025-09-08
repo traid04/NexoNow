@@ -8,7 +8,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { sendChangeMail, sendVerificationMail } from "../services/mailService";
 import { isObject } from "../utils/typeGuards";
 import { tokenExtractor } from "../middleware/tokenExtractor";
-import { fileFilter, uploadAvatar } from "../services/imageUploadService";
+import { deleteAvatar, fileFilter, uploadAvatar } from "../services/imagesService";
 import multer from 'multer';
 const router: Router = express.Router();
 const upload = multer({
@@ -17,7 +17,7 @@ const upload = multer({
   fileFilter
 });
 
-router.get("/", async (_req, res, next) => {
+router.get('/', async (_req, res, next) => {
   try {
     const users = await User.findAll({
       attributes: ["id", "avatarPhoto", "username", "firstName", "lastName", "birthDate", "email"],
@@ -35,7 +35,7 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
-router.get("/:id", async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   if (isNaN(Number(req.params.id))) {
     return res.status(400).json({ error: 'User ID must be a number' });
   }
@@ -59,7 +59,7 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/", upload.single('avatarPhoto'), async (req, res, next) => {
+router.post('/', upload.single('avatarPhoto'), async (req, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
@@ -73,8 +73,9 @@ router.post("/", upload.single('avatarPhoto'), async (req, res, next) => {
     }
     const userEntry: NewUserEntry = parseNewUserEntry(req.body);
     const passwordHash = await bcrypt.hash(userEntry.password, 10);
-    const verifyToken = jsonwebtoken.sign({ email: userEntry.email }, JWT_TOP_SECRET_KEY, { expiresIn:'1d' });
+    const verifyToken = jsonwebtoken.sign({ email: userEntry.email }, JWT_TOP_SECRET_KEY, { expiresIn: '1d' });
     const userToAdd = {
+      avatarId: avatar.public_id,
       avatarPhoto: avatar.secure_url,
       username: userEntry.username,
       firstName: userEntry.firstName,
@@ -98,6 +99,39 @@ router.post("/", upload.single('avatarPhoto'), async (req, res, next) => {
   }
   catch(error) {
     next(error);
+  }
+});
+
+router.patch('/me/change-avatar', tokenExtractor, upload.single('avatarPhoto'), async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Token missing or invalid" });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: "New avatar photo required" });
+  }
+  try {
+    const user = await User.findByPk(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (!user.avatarId) {
+      return res.status(404).json({ error: "This user does not have profile picture"});
+    }
+    const result = await deleteAvatar(user.avatarId);
+    if (result.result !== "ok") {
+      return res.status(400).json({ error: result.result });
+    }
+    const newAvatar = await uploadAvatar(req.file);
+    if (!newAvatar) {
+      return res.status(400).json({ error: "Error uploading profile picture" });
+    }
+    user.avatarId = newAvatar.public_id;
+    user.avatarPhoto = newAvatar.secure_url;
+    await user.save();
+    return res.status(200).json({ message: 'Image updated successfully', newAvatar: newAvatar.secure_url });
+  }
+  catch(error) {
+    next(error); 
   }
 });
 
