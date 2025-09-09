@@ -196,10 +196,57 @@ module.exports = {
         unique: true,
       },
     });
+
+    await queryInterface.createTable("reviews", {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "users",
+          key: "id"
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+      },
+      seller_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "sellers",
+          key: "id"
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+      },
+      comment: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      rating: {
+        type: DataTypes.DECIMAL(2,1),
+        allowNull: false
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+    })
   },
   down: async ({ context: queryInterface }) => {
-    await queryInterface.dropTable("categories");
+    await queryInterface.dropTable("reviews");
     await queryInterface.dropTable("products");
+    await queryInterface.dropTable("categories");
     await queryInterface.dropTable("sellers");
     await queryInterface.dropTable("users");
   },

@@ -59,3 +59,15 @@ export type UpdateSellerDataEntry = {
 export interface AvatarDestroyResponse {
   result: string;
 }
+
+export type NewReviewEntry = {
+  userId: number;
+  sellerId: number;
+  comment?: string;
+  rating: number;
+}
+
+export type UpdateReviewEntry = {
+  comment?: string;
+  rating?: number;
+}

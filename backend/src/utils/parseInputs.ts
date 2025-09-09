@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
@@ -158,4 +158,36 @@ export const parseUpdateSellerDataEntry = (entry: unknown): UpdateSellerDataEntr
     fieldsToUpdate.phoneNumber = parseString(entry.phoneNumber);
   }
   return fieldsToUpdate;
+}
+
+export const parseNewReviewEntry = (entry: unknown): NewReviewEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  if ('userId' in entry && 'sellerId' in entry && 'rating' in entry) {
+    let newReview: NewReviewEntry = {
+      userId: parseNumber(entry.userId),
+      sellerId: parseNumber(entry.sellerId),
+      rating: parseNumber(entry.rating)
+    };
+    if ('comment' in entry) {
+      newReview.comment = parseString(entry.comment);
+    }
+    return newReview;
+  }
+  throw new Error('Invalid Data: Some fields are missing');
+}
+
+export const parseUpdateReviewEntry = (entry: unknown): UpdateReviewEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  let updatedReview: UpdateReviewEntry = {};
+  if ('comment' in entry) {
+    updatedReview.comment = parseString(entry.comment);
+  }
+  if ('rating' in entry) {
+    updatedReview.rating = parseNumber(entry.rating);
+  }
+  return updatedReview;
 }

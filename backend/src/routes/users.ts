@@ -10,6 +10,7 @@ import { isObject } from "../utils/typeGuards";
 import { tokenExtractor } from "../middleware/tokenExtractor";
 import { deleteAvatar, fileFilter, uploadAvatar } from "../services/imagesService";
 import multer from 'multer';
+import { IDValidator } from "../middleware/IDValidator";
 const router: Router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -35,10 +36,7 @@ router.get('/', async (_req, res, next) => {
   }
 });
 
-router.get('/:id', async (req, res, next) => {
-  if (isNaN(Number(req.params.id))) {
-    return res.status(400).json({ error: 'User ID must be a number' });
-  }
+router.get('/:id', IDValidator, async (req, res, next) => {
   try {
     const user = await User.findByPk(Number(req.params.id), {
       attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"],
