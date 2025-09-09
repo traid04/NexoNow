@@ -1,4 +1,4 @@
-const tables = ['product_categories', 'migrations', 'users', 'categories', 'products', 'sellers'];
+const tables = ['product_categories', 'migrations', 'users', 'categories', 'products', 'sellers', 'reviews'];
 
 module.exports = {
   up: async ({ context: queryInterface }) => {
