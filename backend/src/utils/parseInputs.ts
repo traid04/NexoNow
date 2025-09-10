@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
@@ -190,4 +190,34 @@ export const parseUpdateReviewEntry = (entry: unknown): UpdateReviewEntry => {
     updatedReview.rating = parseNumber(entry.rating);
   }
   return updatedReview;
+}
+
+export const parseNewProductEntry = (entry: unknown): NewProductEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  if ('sellerId' in entry && 'name' in entry && 'price' in entry && 'currency' in entry && 'stock' in entry && 'location' in entry && 'categoryId' in entry) {
+    let newProduct: NewProductEntry = {
+      sellerId: parseNumber(entry.sellerId),
+      name: parseString(entry.name),
+      price: parseNumber(entry.price),
+      currency: parseString(entry.currency),
+      stock: parseNumber(entry.stock),
+      location: parseString(entry.location),
+      categoryId: parseNumber(entry.categoryId)
+    };
+    if ('offerPrice' in entry) {
+      if (!('startOfferDate' in entry && 'endOfferDate' in entry)) {
+        throw new Error('Invalid Fields: Must specify start and end date for offer');
+      }
+      newProduct.offerPrice = parseNumber(entry.offerPrice);
+      newProduct.startOfferDate = parseDate(entry.startOfferDate);
+      newProduct.endOfferDate = parseDate(entry.endOfferDate);
+    }
+    if ('description' in entry) {
+      newProduct.description = parseString(entry.description);
+    }
+    return newProduct;
+  }
+  throw new Error('Invalid Data: Some fields are missing');
 }

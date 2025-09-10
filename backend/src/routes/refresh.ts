@@ -11,7 +11,6 @@ router.post("/", async (req, res, next) => {
   }
   try {
     const decodedToken = jsonwebtoken.verify(req.signedCookies.refreshToken, JWT_TOP_SECRET_KEY);
-    console.log(decodedToken);
     if (!(isObject(decodedToken) && 'userId' in decodedToken && 'email' in decodedToken)) {
       return res.status(400).json({ error: 'Invalid Token structure' });
     }

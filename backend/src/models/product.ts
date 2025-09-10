@@ -1,20 +1,19 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../utils/db";
-import { Seller } from "./index";
+import { Category, Seller } from "./index";
 
 class Product extends Model {
   declare id: number;
   declare sellerId: number;
   declare name: string;
-  declare price: string;
+  declare price: number;
   declare offerPrice: number;
-  declare startOfferDate: Date;
-  declare endOfferDate: Date;
+  declare startOfferDate: string;
+  declare endOfferDate: string;
   declare description: string;
-  declare images: string[];
   declare stock: number;
   declare location: string;
-  declare category: string;
+  declare categoryId: number;
 }
 
 Product.init(
@@ -43,6 +42,10 @@ Product.init(
         min: 0,
       },
     },
+    currency: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     offerPrice: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
@@ -51,20 +54,16 @@ Product.init(
       }
     },
     startOfferDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     endOfferDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
-    images: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
     },
     stock: {
       type: DataTypes.INTEGER,
@@ -77,9 +76,13 @@ Product.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    category: {
-      type: DataTypes.STRING,
+    categoryId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: Category,
+        key: "id"
+      }
     },
   },
   {

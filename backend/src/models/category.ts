@@ -23,6 +23,7 @@ Category.init(
     sequelize,
     modelName: "category",
     underscored: true,
+    timestamps: false
   }
 );
 

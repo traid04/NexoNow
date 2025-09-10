@@ -49,3 +49,7 @@ export const deleteAvatar = (publicId: string): Promise<AvatarDestroyResponse> =
     })
   });
 }
+
+export const uploadProductPhotos = (req: Express.Multer.File) => {
+  console.log(req);
+}

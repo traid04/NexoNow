@@ -21,6 +21,9 @@ router.post('/', async (req, res, next) => {
     if (!dbUser) {
       return res.status(404).json({ error: `User with email ${loginUser.email} not found` });
     }
+    if (!dbUser.isVerified) {
+      return res.status(401).json({ error: "You must have your account verified for log in" });
+    }
     const correctPassword = await bcrypt.compare(loginUser.password, dbUser.passwordHash);
     if (!correctPassword) {
       return res.status(401).json({ error: "Incorrect password" });

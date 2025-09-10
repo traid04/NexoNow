@@ -7,6 +7,7 @@ import refreshRouter from "./routes/refresh";
 import logoutRouter from "./routes/logout";
 import sellersRouter from "./routes/sellers";
 import reviewsRouter from "./routes/reviews";
+import productsRouter from "./routes/products";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 const app = express();
@@ -20,6 +21,7 @@ app.use("/api/refresh", refreshRouter);
 app.use("/api/logout", logoutRouter);
 app.use("/api/sellers", sellersRouter);
 app.use("/api/reviews", reviewsRouter);
+app.use("/api/products", productsRouter);
 
 app.use(errorHandler);
 

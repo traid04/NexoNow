@@ -13,3 +13,7 @@ export const isObject = (obj: unknown): obj is object => {
 export const isNumber = (num: unknown): num is number => {
   return typeof num === 'number';
 }
+
+export const isPhotoArray = (array: unknown): array is Express.Multer.File[] => {
+  return Array.isArray(array);
+}

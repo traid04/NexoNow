@@ -116,6 +116,19 @@ module.exports = {
       },
     });
 
+    await queryInterface.createTable("categories", {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+    });
+
     await queryInterface.createTable("products", {
       id: {
         type: DataTypes.INTEGER,
@@ -140,35 +153,39 @@ module.exports = {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+      currency: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
       offer_price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true
       },
       start_offer_date: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true,
       },
       end_offer_date: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true,
       },
       description: {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      images: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
+      category_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "categories",
+          key: "id"
+        }
       },
       stock: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
       location: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      category: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -181,19 +198,6 @@ module.exports = {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
-      },
-    });
-
-    await queryInterface.createTable("categories", {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
       },
     });
 
@@ -242,9 +246,35 @@ module.exports = {
         defaultValue: DataTypes.NOW,
       },
     })
+
+    await queryInterface.createTable("product_photos", {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      product_id: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "products",
+          key: "id"
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+      },
+      photo_id: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      url: {
+        type: DataTypes.STRING,
+        allowNull: false
+      }
+    })
   },
   down: async ({ context: queryInterface }) => {
     await queryInterface.dropTable("reviews");
+    await queryInterface.dropTable("product_photos");
     await queryInterface.dropTable("products");
     await queryInterface.dropTable("categories");
     await queryInterface.dropTable("sellers");

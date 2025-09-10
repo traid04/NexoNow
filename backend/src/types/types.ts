@@ -71,3 +71,17 @@ export type UpdateReviewEntry = {
   comment?: string;
   rating?: number;
 }
+
+export type NewProductEntry = {
+  sellerId: number;
+  name: string;
+  price: number;
+  currency: string;
+  offerPrice?: number;
+  startOfferDate?: string;
+  endOfferDate?: string;
+  description?: string;
+  stock: number;
+  location: string;
+  categoryId: number;
+}
