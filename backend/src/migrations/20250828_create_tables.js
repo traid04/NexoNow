@@ -153,8 +153,12 @@ module.exports = {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+      price_in_uyu: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false
+      },
       currency: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('UYU', 'USD'),
         allowNull: false
       },
       offer_price: {
@@ -173,13 +177,19 @@ module.exports = {
         type: DataTypes.TEXT,
         allowNull: true,
       },
+      condition: {
+        type: DataTypes.ENUM('new', 'used', 'refurbished'),
+        allowNull: false
+      },
       category_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
           model: "categories",
           key: "id"
-        }
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
       },
       stock: {
         type: DataTypes.INTEGER,
@@ -199,6 +209,11 @@ module.exports = {
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+      views: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      }
     });
 
     await queryInterface.createTable("reviews", {

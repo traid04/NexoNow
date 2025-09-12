@@ -1,4 +1,4 @@
-const tables = ['product_categories', 'migrations', 'users', 'categories', 'products', 'sellers', 'reviews'];
+const tables = ['product_photos', 'users', 'categories', 'products', 'sellers', 'reviews'];
 
 module.exports = {
   up: async ({ context: queryInterface }) => {
@@ -18,7 +18,7 @@ module.exports = {
             TO authenticated
             WITH CHECK (true);
 
-        CREATE POLICY "Only authenticated users can update ${table}"
+        CREATE POLICY"Only authenticated users can update ${table}"
             ON public.${table}
             FOR UPDATE
             TO authenticated

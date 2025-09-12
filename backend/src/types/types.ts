@@ -72,11 +72,23 @@ export type UpdateReviewEntry = {
   rating?: number;
 }
 
+export enum ProductCondition {
+  new = "new",
+  used = "used",
+  refurbished = "refurbished"
+}
+
+export enum ProductCurrency {
+  uyu = "UYU",
+  usd = "USD"
+}
+
 export type NewProductEntry = {
   sellerId: number;
   name: string;
   price: number;
-  currency: string;
+  priceInUyu: number;
+  currency: ProductCurrency;
   offerPrice?: number;
   startOfferDate?: string;
   endOfferDate?: string;
@@ -84,4 +96,21 @@ export type NewProductEntry = {
   stock: number;
   location: string;
   categoryId: number;
+  condition: ProductCondition;
+}
+
+export enum OrderQuery {
+  priceAsc = "lowerprice",
+  priceDesc = "higherprice",
+  mostRelevant = "mostrelevant"
+}
+
+export type QueryParams = {
+  limit?: number;
+  offset?: number;
+  location?: string;
+  condition?: ProductCondition;
+  minPrice?: number;
+  maxPrice?: number;
+  order?: OrderQuery;
 }

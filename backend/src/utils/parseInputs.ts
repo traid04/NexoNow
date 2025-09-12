@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry, QueryParams, ProductCondition, ProductCurrency, OrderQuery } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
 const parseString = (str: unknown): string => {
@@ -16,10 +16,34 @@ const parseDate = (date: unknown): string => {
 };
 
 const parseNumber = (num: unknown): number => {
-  if (!num || typeof num !== 'number' || !isNumber(num)) {
+  if (num === undefined || typeof num !== 'number' || !isNumber(num)) {
     throw new Error("Invalid or undefined data: Number expected");
   }
   return num;
+}
+
+const parseProductCondition = (str: unknown): ProductCondition => {
+  const parsedCondition = parseString(str).toLowerCase();
+  if (parsedCondition === 'new' || parsedCondition === 'used' || parsedCondition === 'refurbished') {
+    return parsedCondition as ProductCondition;
+  }
+  throw new Error("Invalid Data: Invalid Product Condition, must be new, used or refurbished");
+}
+
+const parseProductCurrency = (str: unknown): ProductCurrency => {
+  const parsedCurrency = parseString(str).toUpperCase();
+  if (parsedCurrency === 'UYU' || parsedCurrency === 'USD') {
+    return parsedCurrency as ProductCurrency;
+  }
+  throw new Error("Invalid Data: Invalid Product Currency, must be UYU or USD");
+}
+
+const parseProductOrderQuery = (str: unknown): OrderQuery => {
+  const parsedQuery = parseString(str).toLowerCase();
+  if (parsedQuery === "lowerprice" || parsedQuery === "higherprice" || parsedQuery === "mostrelevant") {
+    return parsedQuery as OrderQuery
+  }
+  throw new Error("Invalid Data: Invalid Order Query,")
 }
 
 export const parseNewUserEntry = (user: unknown): NewUserEntry => {
@@ -196,15 +220,17 @@ export const parseNewProductEntry = (entry: unknown): NewProductEntry => {
   if (!entry || typeof entry !== 'object') {
     throw new Error('Invalid Data: Object expected');
   }
-  if ('sellerId' in entry && 'name' in entry && 'price' in entry && 'currency' in entry && 'stock' in entry && 'location' in entry && 'categoryId' in entry) {
+  if ('sellerId' in entry && 'name' in entry && 'price' in entry && 'currency' in entry && 'priceInUyu' in entry && 'stock' in entry && 'location' in entry && 'categoryId' in entry && 'condition' in entry) {
     let newProduct: NewProductEntry = {
       sellerId: parseNumber(entry.sellerId),
       name: parseString(entry.name),
       price: parseNumber(entry.price),
-      currency: parseString(entry.currency),
+      priceInUyu: parseNumber(entry.priceInUyu),
+      currency: parseProductCurrency(entry.currency),
       stock: parseNumber(entry.stock),
       location: parseString(entry.location),
-      categoryId: parseNumber(entry.categoryId)
+      categoryId: parseNumber(entry.categoryId),
+      condition: parseProductCondition(entry.condition)
     };
     if ('offerPrice' in entry) {
       if (!('startOfferDate' in entry && 'endOfferDate' in entry)) {
@@ -220,4 +246,33 @@ export const parseNewProductEntry = (entry: unknown): NewProductEntry => {
     return newProduct;
   }
   throw new Error('Invalid Data: Some fields are missing');
+}
+
+export const parseQueryParams = (params: unknown): QueryParams => {
+  let queryParams: QueryParams = { offset: 0, limit: 20 };
+  if (!params || typeof params !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  if ('offset' in params) {
+    queryParams.offset = parseNumber(Number(params.offset));
+  }
+  if ('limit' in params) {
+    queryParams.limit = parseNumber(Number(params.limit));
+  }
+  if ('location' in params) {
+    queryParams.location = parseString(params.location);
+  }
+  if ('condition' in params) {
+    queryParams.condition = parseProductCondition(params.condition);
+  }
+  if ('minPrice' in params) {
+    queryParams.minPrice = parseNumber(Number(params.minPrice));
+  }
+  if ('maxPrice' in params) {
+    queryParams.maxPrice = parseNumber(Number(params.maxPrice));
+  }
+  if ('order' in params) {
+    queryParams.order = parseProductOrderQuery(params.order);
+  }
+  return queryParams;
 }

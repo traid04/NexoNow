@@ -7,6 +7,8 @@ class Product extends Model {
   declare sellerId: number;
   declare name: string;
   declare price: number;
+  declare priceInUyu: number;
+  declare currency: string;
   declare offerPrice: number;
   declare startOfferDate: string;
   declare endOfferDate: string;
@@ -14,6 +16,7 @@ class Product extends Model {
   declare stock: number;
   declare location: string;
   declare categoryId: number;
+  declare condition: string;
 }
 
 Product.init(
@@ -42,8 +45,15 @@ Product.init(
         min: 0,
       },
     },
+    priceInUyu: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      validate: {
+        min: 0,
+      }
+    },
     currency: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('UYU', 'USD'),
       allowNull: false
     },
     offerPrice: {
@@ -65,6 +75,10 @@ Product.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    condition: {
+      type: DataTypes.ENUM('new', 'used', 'refurbished'),
+      allowNull: false
+    },
     stock: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -84,6 +98,11 @@ Product.init(
         key: "id"
       }
     },
+    views: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    }
   },
   {
     sequelize,
