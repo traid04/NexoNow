@@ -63,14 +63,15 @@ router.get('/', async (req, res, next) => {
       attributes: { exclude: ["categoryId"] },
       include: [{
         model: Category,
-        attributes: ["id", "name"]
+        attributes: ["id", "name"],
       },
       {
         model: Seller,
-        attributes: { exclude: ['userId', "createdAt", "updatedAt"] }
+        attributes: { exclude: ['userId', "createdAt", "updatedAt"] },
       }, {
         model: ProductPhoto
-      }]
+      }],
+      distinct: true
     });
     const totalProducts = count;
     return res.status(200).json({ products, totalProducts, totalPages: Math.ceil(totalProducts / queryParams.limit), currentPage: Math.floor(queryParams.offset / queryParams.limit) + 1 });
