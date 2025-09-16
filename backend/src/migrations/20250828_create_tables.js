@@ -161,16 +161,25 @@ module.exports = {
         type: DataTypes.ENUM('UYU', 'USD'),
         allowNull: false
       },
+      active_offer: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
       offer_price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true
       },
+      offer_price_in_uyu: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+      },
       start_offer_date: {
-        type: DataTypes.STRING,
+        type: DataTypes.DATE,
         allowNull: true,
       },
       end_offer_date: {
-        type: DataTypes.STRING,
+        type: DataTypes.DATE,
         allowNull: true,
       },
       description: {

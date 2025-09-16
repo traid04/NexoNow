@@ -56,7 +56,7 @@ export type UpdateSellerDataEntry = {
   phoneNumber?: string;
 }
 
-export interface AvatarDestroyResponse {
+export interface PhotoDestroyResponse {
   result: string;
 }
 
@@ -89,9 +89,6 @@ export type NewProductEntry = {
   price: number;
   priceInUyu: number;
   currency: ProductCurrency;
-  offerPrice?: number;
-  startOfferDate?: string;
-  endOfferDate?: string;
   description?: string;
   stock: number;
   location: string;
@@ -113,4 +110,22 @@ export type QueryParams = {
   minPrice?: number;
   maxPrice?: number;
   order?: OrderQuery;
+}
+
+export type UpdateProductEntry = {
+  name?: string;
+  price?: number;
+  currency?: ProductCurrency;
+  description?: string;
+  stock?: number;
+  location?: string;
+  categoryId?: number;
+  condition?: ProductCondition;
+  priceInUyu?: number;
+}
+
+export interface CreateOfferEntry {
+  offerPrice: number;
+  startOfferDate: string;
+  endOfferDate: string;
 }

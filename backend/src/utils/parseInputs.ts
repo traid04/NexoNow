@@ -1,7 +1,7 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry, QueryParams, ProductCondition, ProductCurrency, OrderQuery } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry, QueryParams, ProductCondition, ProductCurrency, OrderQuery, UpdateProductEntry, CreateOfferEntry } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
-const parseString = (str: unknown): string => {
+export const parseString = (str: unknown): string => {
   if (!str || !isString(str)) {
     throw new Error("Invalid or undefined data: String expected");
   }
@@ -232,14 +232,6 @@ export const parseNewProductEntry = (entry: unknown): NewProductEntry => {
       categoryId: parseNumber(entry.categoryId),
       condition: parseProductCondition(entry.condition)
     };
-    if ('offerPrice' in entry) {
-      if (!('startOfferDate' in entry && 'endOfferDate' in entry)) {
-        throw new Error('Invalid Fields: Must specify start and end date for offer');
-      }
-      newProduct.offerPrice = parseNumber(entry.offerPrice);
-      newProduct.startOfferDate = parseDate(entry.startOfferDate);
-      newProduct.endOfferDate = parseDate(entry.endOfferDate);
-    }
     if ('description' in entry) {
       newProduct.description = parseString(entry.description);
     }
@@ -275,4 +267,50 @@ export const parseQueryParams = (params: unknown): QueryParams => {
     queryParams.order = parseProductOrderQuery(params.order);
   }
   return queryParams;
+}
+
+export const parseProductUpdateEntry = (entry: unknown): UpdateProductEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  let updateObject: UpdateProductEntry = {};
+  if ('name' in entry) {
+    updateObject.name = parseString(entry.name);
+  }
+  if ('price' in entry) {
+    updateObject.price = parseNumber(entry.price);
+  }
+  if ('currency' in entry) {
+    updateObject.currency = parseProductCurrency(entry.currency);
+  }
+  if ('description' in entry) {
+    updateObject.description = parseString(entry.description);
+  }
+  if ('stock' in entry) {
+    updateObject.stock = parseNumber(entry.stock);
+  }
+  if ('location' in entry) {
+    updateObject.location = parseString(entry.location);
+  }
+  if ('categoryId' in entry) {
+    updateObject.categoryId = parseNumber(entry.categoryId);
+  }
+  if ('condition' in entry) {
+    updateObject.condition = parseProductCondition(entry.condition);
+  }
+  return updateObject;
+}
+
+export const parseCreateOfferEntry = (entry: unknown): CreateOfferEntry => {
+  if (!entry || typeof entry !== "object") {
+    throw new Error("Invalid Data: Object expected");
+  }
+  if (!('offerPrice' in entry && 'startOfferDate' in entry && 'endOfferDate' in entry)) {
+    throw new Error("Invalid Data: Some fields are missing");
+  }
+  return {
+    offerPrice: parseNumber(entry.offerPrice),
+    startOfferDate: parseString(entry.startOfferDate),
+    endOfferDate: parseString(entry.endOfferDate)
+  }
 }

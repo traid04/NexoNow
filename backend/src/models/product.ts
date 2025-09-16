@@ -9,6 +9,8 @@ class Product extends Model {
   declare price: number;
   declare priceInUyu: number;
   declare currency: string;
+  declare activeOffer: boolean;
+  declare offerPriceInUyu: number;
   declare offerPrice: number;
   declare startOfferDate: string;
   declare endOfferDate: string;
@@ -56,6 +58,11 @@ Product.init(
       type: DataTypes.ENUM('UYU', 'USD'),
       allowNull: false
     },
+    activeOffer: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
     offerPrice: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
@@ -63,12 +70,19 @@ Product.init(
         min: 0
       }
     },
+    offerPriceInUyu: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      validate: {
+        min: 0
+      }
+    },
     startOfferDate: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: true,
     },
     endOfferDate: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: true,
     },
     description: {

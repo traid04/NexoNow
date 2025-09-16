@@ -2,7 +2,7 @@ import { FileFilterCallback } from 'multer';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import streamifier from 'streamifier';
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from '../utils/config';
-import { AvatarDestroyResponse } from '../types/types';
+import { PhotoDestroyResponse } from '../types/types';
 
 if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
   throw new Error('Cloudinary credentials invalid');
@@ -25,7 +25,7 @@ export const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb:
   }
 }
 
-export const uploadAvatar = (req: Express.Multer.File): Promise<UploadApiResponse | undefined> => {
+export const uploadPhoto = (req: Express.Multer.File): Promise<UploadApiResponse | undefined> => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, callResult) => {
       if (error) {
@@ -37,7 +37,7 @@ export const uploadAvatar = (req: Express.Multer.File): Promise<UploadApiRespons
   });
 }
 
-export const deleteAvatar = (publicId: string): Promise<AvatarDestroyResponse> => {
+export const deletePhoto = (publicId: string): Promise<PhotoDestroyResponse> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(publicId, (error, result) => {
       if (error) {
@@ -48,8 +48,4 @@ export const deleteAvatar = (publicId: string): Promise<AvatarDestroyResponse> =
       }
     })
   });
-}
-
-export const uploadProductPhotos = (req: Express.Multer.File) => {
-  console.log(req);
 }

@@ -2,11 +2,11 @@ import express from 'express';
 import { sequelize } from '../utils/db';
 import { tokenExtractor } from '../middleware/tokenExtractor';
 import { Category, Product, ProductPhoto, Seller } from '../models/index';
-import { fileFilter, uploadAvatar } from '../services/imagesService';
+import { deletePhoto, fileFilter, uploadPhoto } from '../services/imagesService';
 import { IDValidator } from '../middleware/IDValidator';
 import { NewProductEntry, RequestWithUser } from '../types/types';
 import multer from 'multer';
-import { parseNewProductEntry, parseQueryParams } from '../utils/parseInputs';
+import { parseCreateOfferEntry, parseNewProductEntry, parseProductUpdateEntry, parseQueryParams, parseString } from '../utils/parseInputs';
 import { isNumber, isPhotoArray } from '../utils/typeGuards';
 import { UploadApiResponse } from 'cloudinary';
 import { Op, Order, WhereOptions } from 'sequelize';
@@ -101,9 +101,6 @@ router.post('/', upload.array('photos', 40), tokenExtractor, async (req: Request
       stock: parseInt(req.body.stock),
       sellerId: Number(seller.id)
     }
-    if ('offerPrice' in req.body) {
-      productBody.offerPrice = parseFloat(req.body.offerPrice);
-    }
     const product = parseNewProductEntry(productBody);
     if (product.currency === 'USD') {
       const priceInUyu = await USDToUYU(product.price);
@@ -120,7 +117,7 @@ router.post('/', upload.array('photos', 40), tokenExtractor, async (req: Request
     if (req.files.length < 5) {
       return res.status(400).json({ error: 'At least 5 photos are required' });
     }
-    let photos: Promise<UploadApiResponse | undefined>[] = req.files.map(file => uploadAvatar(file));
+    let photos: Promise<UploadApiResponse | undefined>[] = req.files.map(file => uploadPhoto(file));
     const photosApiResponse = await Promise.all(photos);
     const photosToAdd = photosApiResponse.map(photo => {
       if (!(photo && 'public_id' in photo && 'secure_url' in photo)) {
@@ -178,6 +175,159 @@ router.get('/:id', IDValidator, async (req, res, next) => {
   catch(error) {
     next(error);
   }
-})
+});
+
+router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  try {
+    const seller = await Seller.findOne({ where: { userId: req.user.userId } });
+    if (!seller) {
+      return res.status(403).json({ error: "You cannot delete products from other sellers" });
+    }
+    const productToDelete = await Product.findByPk(Number(req.params.id));
+    if (!productToDelete) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    if (productToDelete.sellerId !== seller.id) {
+      return res.status(403).json({ error: "The product to delete must be yours" });
+    }
+    const productPhotosToDelete = await ProductPhoto.findAll({ where: { productId: productToDelete.id } });
+    for (const photo of productPhotosToDelete) {
+      await deletePhoto(photo.photoId);
+    }
+    await productToDelete.destroy();
+    return res.status(204).end();
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  try {
+    const seller = await Seller.findOne({ where: { userId: req.user.userId } });
+    if (!seller) {
+      return res.status(403).json({ error: "You cannot update products from other sellers" });
+    }
+    const product = await Product.findByPk(Number(req.params.id));
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    const fieldsToUpdate = req.body;
+    if ('newCategory' in fieldsToUpdate) {
+      const category = await Category.findOne({ where: { name: fieldsToUpdate.newCategory } });
+      if (!category) {
+        return res.status(400).json({ error: "New Category not found" });
+      }
+      fieldsToUpdate.categoryId = category.id;
+    }
+    const parsedUpdate = parseProductUpdateEntry(fieldsToUpdate);
+    if ('price' in parsedUpdate && 'currency' in parsedUpdate) {
+      if (isNumber(parsedUpdate.price) && parsedUpdate.currency === 'USD') {
+        parsedUpdate.priceInUyu = await USDToUYU(parsedUpdate.price);
+      }
+      else if (isNumber(parsedUpdate.price) && parsedUpdate.currency === 'UYU') {
+        parsedUpdate.priceInUyu = parsedUpdate.price;
+      }
+    }
+    const [updatedCount] = await Product.update(parsedUpdate, {
+      where: {
+        id: product.id,
+        sellerId: seller.id
+      }
+    });
+    if (updatedCount === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    await product.reload();
+    return res.status(200).json(product);
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.patch('/:id/photos/:photoId', IDValidator, tokenExtractor, upload.single('photoToUpdate'), async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'New photo required' });
+  }
+  try {
+    const photoId = parseString(req.params.photoId);
+    const productId = Number(req.params.id);
+    const photoToUpdate = await ProductPhoto.findOne({ where: { photoId, productId } });
+    if (!photoToUpdate) {
+      return res.status(404).json({ error: 'Photo not found' });
+    }
+    const uploadedPhoto = await uploadPhoto(req.file);
+    if (!uploadedPhoto || !("secure_url" in uploadedPhoto) || !("public_id" in uploadedPhoto)) {
+      return res.status(409).json({ error: 'Malformatted request: Cannot upload Photo' });
+    }
+    photoToUpdate.photoId = uploadedPhoto.public_id;
+    photoToUpdate.url = uploadedPhoto.secure_url;
+    await photoToUpdate.save();
+    await deletePhoto(photoId);
+    return res.status(200).json(photoToUpdate);
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.patch('/:id/createOffer', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Token missing or invalid' });
+  }
+  try {
+    const product = await Product.findByPk(Number(req.params.id));
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    const parsedOffer = parseCreateOfferEntry(req.body);
+    let offerPriceInUyu: number | undefined = parsedOffer.offerPrice;
+    if (product.currency === "USD") {
+      offerPriceInUyu = await USDToUYU(parsedOffer.offerPrice);
+      if (typeof offerPriceInUyu !== "number") {
+        return res.status(400).json({ error: "Exchange error" });
+      }
+    }
+    if (offerPriceInUyu >= product.priceInUyu) {
+      return res.status(400).json({ error: "The discount price cannot be higher than the original price" });
+    }
+    const startOfferDate = new Date(parsedOffer.startOfferDate);
+    const endOfferDate = new Date(parsedOffer.endOfferDate);
+    if (startOfferDate.getTime() >= endOfferDate.getTime()) {
+      return res.status(400).json({ error: "The start offer date cannot be equal to or after the end offer date" })
+    }
+    if (startOfferDate.getTime() < Date.now() || endOfferDate.getTime() < Date.now()) {
+      return res.status(400).json({ error: "The start or end offer date cannot be before this moment" });
+    }
+    product.activeOffer = true;
+    product.offerPrice = parsedOffer.offerPrice;
+    product.offerPriceInUyu = offerPriceInUyu;
+    product.startOfferDate = startOfferDate.toISOString();
+    product.endOfferDate = endOfferDate.toISOString();
+    await product.save();
+    const discountPercentage = ((product.priceInUyu - offerPriceInUyu) / product.priceInUyu) * 100;
+    let returnedOffer = {
+      originalOfferPrice: product.currency === "USD" ? parseFloat(product.offerPrice.toFixed(2)) : parseFloat(product.offerPriceInUyu.toFixed(2)),
+      offerPriceInUyu: parseFloat(product.offerPriceInUyu.toFixed(2)),
+      startOfferDate: product.startOfferDate,
+      endOfferDate: product.endOfferDate,
+      discountPercentage: parseFloat(discountPercentage.toFixed(2))
+    };
+    return res.status(200).json(returnedOffer);
+  }
+  catch(error) {
+    next(error);
+  }
+});
 
 export default router;

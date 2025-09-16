@@ -8,7 +8,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { sendChangeMail, sendVerificationMail } from "../services/mailService";
 import { isObject } from "../utils/typeGuards";
 import { tokenExtractor } from "../middleware/tokenExtractor";
-import { deleteAvatar, fileFilter, uploadAvatar } from "../services/imagesService";
+import { deletePhoto, fileFilter, uploadPhoto } from "../services/imagesService";
 import multer from 'multer';
 import { IDValidator } from "../middleware/IDValidator";
 const router: Router = express.Router();
@@ -65,7 +65,7 @@ router.post('/', upload.single('avatarPhoto'), async (req, res, next) => {
     if (!req.file) {
       return res.status(401).json({ error: "The profile picture is required" });
     }
-    const avatar = await uploadAvatar(req.file);
+    const avatar = await uploadPhoto(req.file);
     if (!avatar) {
       return res.status(400).json({ error: "Error uploading profile picture" })
     }
@@ -115,11 +115,11 @@ router.patch('/me/change-avatar', tokenExtractor, upload.single('avatarPhoto'), 
     if (!user.avatarId) {
       return res.status(404).json({ error: "This user does not have profile picture"});
     }
-    const result = await deleteAvatar(user.avatarId);
+    const result = await deletePhoto(user.avatarId);
     if (result.result !== "ok") {
       return res.status(400).json({ error: result.result });
     }
-    const newAvatar = await uploadAvatar(req.file);
+    const newAvatar = await uploadPhoto(req.file);
     if (!newAvatar) {
       return res.status(400).json({ error: "Error uploading profile picture" });
     }
