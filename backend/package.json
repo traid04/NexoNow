@@ -20,6 +20,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.6",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
@@ -27,13 +28,13 @@
     "umzug": "^3.8.2"
   },
   "devDependencies": {
-    "@types/nodemailer": "^7.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.3.0",
+    "@types/nodemailer": "^7.0.1",
     "@types/sequelize": "^4.28.20",
     "@types/streamifier": "^0.1.2",
     "nodemon": "^3.1.10",

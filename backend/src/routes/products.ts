@@ -309,7 +309,12 @@ router.patch('/:id/createOffer', IDValidator, tokenExtractor, async (req: Reques
     if (startOfferDate.getTime() < Date.now() || endOfferDate.getTime() < Date.now()) {
       return res.status(400).json({ error: "The start or end offer date cannot be before this moment" });
     }
-    product.activeOffer = true;
+    if (startOfferDate.getTime() === Date.now()) {
+      product.activeOffer = true
+    }
+    else {
+      product.activeOffer = false;
+    }
     product.offerPrice = parsedOffer.offerPrice;
     product.offerPriceInUyu = offerPriceInUyu;
     product.startOfferDate = startOfferDate.toISOString();

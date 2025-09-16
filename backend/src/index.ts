@@ -10,10 +10,13 @@ import reviewsRouter from "./routes/reviews";
 import productsRouter from "./routes/products";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
+import { updateOffers } from "./jobs/offersJob";
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser(COOKIE_TOP_SECRET_KEY));
+
+updateOffers();
 
 app.use("/api/users", userRouter);
 app.use("/api/login", loginRouter);
