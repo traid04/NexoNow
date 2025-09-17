@@ -266,6 +266,9 @@ export const parseQueryParams = (params: unknown): QueryParams => {
   if ('order' in params) {
     queryParams.order = parseProductOrderQuery(params.order);
   }
+  if ('search' in params) {
+    queryParams.search = parseString(params.search);
+  }
   return queryParams;
 }
 

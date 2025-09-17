@@ -103,6 +103,7 @@ export enum OrderQuery {
 }
 
 export type QueryParams = {
+  search?: string;
   limit?: number;
   offset?: number;
   location?: string;

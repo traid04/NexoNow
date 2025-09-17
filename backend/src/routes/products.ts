@@ -24,6 +24,9 @@ router.get('/', async (req, res, next) => {
     let where: WhereOptions = {};
     let order: Order = [];
     const queryParams = parseQueryParams(req.query);
+    if ('search' in queryParams) {
+      where.name = { [Op.iLike]: `%${queryParams.search}%` }
+    }
     if (!(isNumber(queryParams.offset) && isNumber(queryParams.limit))) {
       return res.status(400).json({ error: 'Limit and Offset must be numbers' });
     }

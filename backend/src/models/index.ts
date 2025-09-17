@@ -4,6 +4,7 @@ import Product from "./product";
 import Category from "./category";
 import Review from './review';
 import ProductPhoto from "./product_photo";
+import ProductHistory from "./product_history";
 
 // 1:1 association between User and Seller
 User.hasOne(Seller);
@@ -29,4 +30,13 @@ Review.belongsTo(User);
 Product.hasMany(ProductPhoto);
 ProductPhoto.belongsTo(Product);
 
-export { User, Seller, Product, Category, Review, ProductPhoto };
+// 1:N association between Product record and Products
+ProductHistory.belongsTo(Product);
+Product.hasMany(ProductHistory);
+
+// 1:N association between Product record and Users
+ProductHistory.belongsTo(User);
+User.hasMany(ProductHistory);
+
+
+export { User, Seller, Product, Category, Review, ProductPhoto, ProductHistory };
