@@ -8,6 +8,7 @@ import logoutRouter from "./routes/logout";
 import sellersRouter from "./routes/sellers";
 import reviewsRouter from "./routes/reviews";
 import productsRouter from "./routes/products";
+import productHistoryRouter from "./routes/product_history";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 import { updateOffers } from "./jobs/offersJob";
@@ -25,6 +26,7 @@ app.use("/api/logout", logoutRouter);
 app.use("/api/sellers", sellersRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/products", productsRouter);
+app.use("/api/productHistory", productHistoryRouter);
 
 app.use(errorHandler);
 

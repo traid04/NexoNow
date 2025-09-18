@@ -1,7 +1,7 @@
-import { Seller, User } from "../models/index";
+import { Product, ProductHistory, Seller, User } from "../models/index";
 import express, { Router } from "express";
 import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
-import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataEntry, parseEmailChangeEntry, parsePasswordChangeEntry } from "../utils/parseInputs";
+import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataEntry, parseEmailChangeEntry, parsePasswordChangeEntry, parseQueryParams } from "../utils/parseInputs";
 import bcrypt from "bcrypt";
 import { JWT_TOP_SECRET_KEY } from "../utils/config";
 import jsonwebtoken from 'jsonwebtoken';
@@ -337,6 +337,45 @@ router.post('/verify/expired', async (req, res, next) => {
   catch(error) {
     next(error);
   }
-})
+});
+
+router.get('/me/productHistory', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Token missing or invalid" });
+  }
+  try {
+    const user = await User.findByPk(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const queryParams = parseQueryParams(req.query);
+    if (queryParams.limit === undefined || queryParams.offset === undefined) {
+      return res.status(400).json({ error: "Limit and Offset cannot be undefined" });
+    }
+    if (queryParams.limit <= 0 || queryParams.offset < 0) {
+      return res.status(400).json({ error: "Invalid limit or offset" });
+    }
+    const { count, rows: history } = await ProductHistory.findAndCountAll({
+      limit: queryParams.limit,
+      offset: queryParams.offset,
+      order: [['createdAt', 'DESC']],
+      where: {
+        userId: user.id
+      },
+      attributes: {
+        exclude: ["userId", "productId"]
+      },
+      include:{
+        model: Product
+      }
+    });
+    const totalPages = Math.ceil(count / queryParams.limit)
+    const currentPage = Math.floor((queryParams.offset / queryParams.limit) + 1);
+    return res.status(200).json({ history, totalResults: count, totalPages, currentPage });
+  }
+  catch(error) {
+    next(error);
+  }
+});
 
 export default router;

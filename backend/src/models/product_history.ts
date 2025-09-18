@@ -35,6 +35,7 @@ ProductHistory.init(
   {
     sequelize,
     modelName: "product_history",
+    freezeTableName: true,
     underscored: true
   }
 )

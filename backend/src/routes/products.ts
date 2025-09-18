@@ -1,7 +1,7 @@
 import express from 'express';
 import { sequelize } from '../utils/db';
 import { tokenExtractor } from '../middleware/tokenExtractor';
-import { Category, Product, ProductPhoto, Seller } from '../models/index';
+import { Category, Product, ProductHistory, ProductPhoto, Seller } from '../models/index';
 import { deletePhoto, fileFilter, uploadPhoto } from '../services/imagesService';
 import { IDValidator } from '../middleware/IDValidator';
 import { NewProductEntry, RequestWithUser } from '../types/types';
@@ -11,6 +11,7 @@ import { isNumber, isPhotoArray } from '../utils/typeGuards';
 import { UploadApiResponse } from 'cloudinary';
 import { Op, Order, WhereOptions } from 'sequelize';
 import { USDToUYU } from '../services/exchangeService';
+import { optionalTokenExtractor } from '../middleware/optionalTokenExtractor';
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 3 * 1024 * 1024 },
@@ -153,7 +154,7 @@ router.post('/', upload.array('photos', 40), tokenExtractor, async (req: Request
   }
 });
 
-router.get('/:id', IDValidator, async (req, res, next) => {
+router.get('/:id', IDValidator, optionalTokenExtractor, async (req: RequestWithUser, res, next) => {
   try {
     const product = await Product.findByPk(Number(req.params.id), {
       attributes: { exclude: ["categoryId"] },
@@ -173,6 +174,20 @@ router.get('/:id', IDValidator, async (req, res, next) => {
     }
     await product.increment('views', { by: 1 });
     await product.reload();
+    if (req.user) {
+      const history = await ProductHistory.findAll({
+        limit: 10,
+        order: [["createdAt", "DESC"]],
+        where: {
+          userId: req.user.userId
+        },
+        attributes: ["productId"]
+      });
+      const exists = history.some(p => p.productId === product.id);
+      if (!exists) {
+        await ProductHistory.create({ productId: product.id, userId: req.user.userId });
+      }
+    }
     return res.status(200).json(product);
   }
   catch(error) {
