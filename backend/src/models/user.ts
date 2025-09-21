@@ -14,6 +14,10 @@ class User extends Model {
   declare refreshToken: string;
   declare avatarPhoto: string;
   declare avatarId: string;
+  declare mpAccessToken: string;
+  declare mpRefreshToken: string;
+  declare mpTokenExpiration: string;
+  declare mpState: string;
 }
 
 User.init(
@@ -59,7 +63,7 @@ User.init(
     isVerified: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true
+      defaultValue: false
     },
     verifyToken: {
       type: DataTypes.STRING,
@@ -70,6 +74,22 @@ User.init(
       allowNull: false,
     },
     refreshToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    mpAccessToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    mpRefreshToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    mpTokenExpiration: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    mp_state: {
       type: DataTypes.STRING,
       allowNull: true
     }

@@ -55,6 +55,22 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: true
       },
+      mp_access_token: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      mp_refresh_token: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      mp_token_expiration: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+      mp_state: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
