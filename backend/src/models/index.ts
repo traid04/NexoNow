@@ -5,6 +5,7 @@ import Category from "./category";
 import Review from './review';
 import ProductPhoto from "./product_photo";
 import ProductHistory from "./product_history";
+import Favorite from "./favorite";
 
 // 1:1 association between User and Seller
 User.hasOne(Seller);
@@ -38,5 +39,8 @@ Product.hasMany(ProductHistory);
 ProductHistory.belongsTo(User);
 User.hasMany(ProductHistory);
 
+// N:M association between Product, User and Favorites
+Product.belongsToMany(User, { through: Favorite, as: "favorites" });
+User.belongsToMany(Product, { through: Favorite, as: "favoritedBy" });
 
-export { User, Seller, Product, Category, Review, ProductPhoto, ProductHistory };
+export { User, Seller, Product, Category, Review, ProductPhoto, ProductHistory, Favorite };
