@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
-router.get('/mp', tokenExtractor, async (req: RequestWithUser, res) => {
+router.get('/', tokenExtractor, async (req: RequestWithUser, res) => {
   if (!req.user) {
     return res.status(401).json({ error: "Token missing or invalid" });
   }

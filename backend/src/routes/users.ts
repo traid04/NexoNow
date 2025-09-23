@@ -1,4 +1,4 @@
-import { Product, ProductHistory, Seller, User } from "../models/index";
+import { Favorite, Product, ProductHistory, Seller, User } from "../models/index";
 import express, { Router } from "express";
 import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
 import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataEntry, parseEmailChangeEntry, parsePasswordChangeEntry, parseQueryParams } from "../utils/parseInputs";
@@ -63,7 +63,7 @@ router.post('/', upload.single('avatarPhoto'), async (req, res, next) => {
   }
   try {
     if (!req.file) {
-      return res.status(401).json({ error: "The profile picture is required" });
+      return res.status(400).json({ error: "The profile picture is required" });
     }
     const avatar = await uploadPhoto(req.file);
     if (!avatar) {
@@ -365,13 +365,40 @@ router.get('/me/productHistory', tokenExtractor, async (req: RequestWithUser, re
       attributes: {
         exclude: ["userId", "productId"]
       },
-      include:{
+      include: {
         model: Product
       }
     });
     const totalPages = Math.ceil(count / queryParams.limit)
     const currentPage = Math.floor((queryParams.offset / queryParams.limit) + 1);
     return res.status(200).json({ history, totalResults: count, totalPages, currentPage });
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.get('/me/favorites', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Token missing or invalid" });
+  }
+  try {
+    const favs = await User.findOne({
+      where: {
+        id: req.user.userId
+      },
+      include: {
+        model: Product,
+        as: "favorites",
+        attributes: {
+          exclude: ["createdAt", "updatedAt", "categoryId"]
+        },
+        through: { attributes: [] }
+      },
+      attributes: ["id", "username", "email", "birthDate", "createdAt", "updatedAt", "avatarPhoto"],
+      order: [[{ model: Product, as: "favorites" }, Favorite, "createdAt", "DESC"]]
+    });
+    return res.status(200).json(favs);
   }
   catch(error) {
     next(error);

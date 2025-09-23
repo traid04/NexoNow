@@ -8,8 +8,9 @@ import logoutRouter from "./routes/logout";
 import sellersRouter from "./routes/sellers";
 import reviewsRouter from "./routes/reviews";
 import productsRouter from "./routes/products";
-import mercadoPagoAuth from "./routes/mercadoPagoAuth";
+import mercadoPagoAuthRouter from "./routes/mercadoPagoAuth";
 import productHistoryRouter from "./routes/productHistory";
+import favoritesRouter from "./routes/favorites";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 import { updateOffers } from "./jobs/offersJob";
@@ -28,7 +29,8 @@ app.use("/api/sellers", sellersRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/productHistory", productHistoryRouter);
-app.use("/api/oauth", mercadoPagoAuth);
+app.use("/api/oauth/mp", mercadoPagoAuthRouter);
+app.use("/api/favorites", favoritesRouter);
 
 app.use(errorHandler);
 

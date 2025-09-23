@@ -15,7 +15,7 @@ const parseDate = (date: unknown): string => {
   return date;
 };
 
-const parseNumber = (num: unknown): number => {
+export const parseNumber = (num: unknown): number => {
   if (num === undefined || typeof num !== 'number' || !isNumber(num)) {
     throw new Error("Invalid or undefined data: Number expected");
   }

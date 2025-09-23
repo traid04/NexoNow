@@ -40,7 +40,7 @@ ProductHistory.belongsTo(User);
 User.hasMany(ProductHistory);
 
 // N:M association between Product, User and Favorites
-Product.belongsToMany(User, { through: Favorite, as: "favorites" });
-User.belongsToMany(Product, { through: Favorite, as: "favoritedBy" });
+Product.belongsToMany(User, { through: Favorite, as: "favoritedBy" });
+User.belongsToMany(Product, { through: Favorite, as: "favorites" });
 
 export { User, Seller, Product, Category, Review, ProductPhoto, ProductHistory, Favorite };
