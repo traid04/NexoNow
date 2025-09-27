@@ -6,6 +6,7 @@ class Cart extends Model {
   declare id: number;
   declare userId: number;
   declare productId: number;
+  declare quantity: number;
 }
 
 Cart.init(
@@ -40,7 +41,8 @@ Cart.init(
   {
     sequelize,
     modelName: "cart",
-    underscored: true
+    underscored: true,
+    freezeTableName: true
   }
 )
 

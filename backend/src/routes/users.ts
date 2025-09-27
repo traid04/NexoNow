@@ -1,4 +1,4 @@
-import { Favorite, Product, ProductHistory, Seller, User } from "../models/index";
+import { Cart, Favorite, Product, ProductHistory, Seller, User } from "../models/index";
 import express, { Router } from "express";
 import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
 import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataEntry, parseEmailChangeEntry, parsePasswordChangeEntry, parseQueryParams } from "../utils/parseInputs";
@@ -339,7 +339,7 @@ router.post('/verify/expired', async (req, res, next) => {
   }
 });
 
-router.get('/me/productHistory', tokenExtractor, async (req: RequestWithUser, res, next) => {
+router.get('/me/product-history', tokenExtractor, async (req: RequestWithUser, res, next) => {
   if (!req.user) {
     return res.status(401).json({ error: "Token missing or invalid" });
   }
@@ -399,6 +399,29 @@ router.get('/me/favorites', tokenExtractor, async (req: RequestWithUser, res, ne
       order: [[{ model: Product, as: "favorites" }, Favorite, "createdAt", "DESC"]]
     });
     return res.status(200).json(favs);
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.get('/me/cart', tokenExtractor, async (req: RequestWithUser, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Token missing or invalid" });
+  }
+  try {
+    const cart = await Cart.findAll({
+      order: [["createdAt", "DESC"]],
+      where: {
+        userId: req.user.userId
+      },
+      include: {
+        model: Product,
+        attributes: { exclude: ["sellerId", "description", "categoryId", "createdAt", "updatedAt"] }
+      },
+      attributes: { exclude: ["userId", "productId"] }
+    });
+    return res.status(200).json(cart);
   }
   catch(error) {
     next(error);

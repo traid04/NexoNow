@@ -130,3 +130,9 @@ export interface CreateOfferEntry {
   startOfferDate: string;
   endOfferDate: string;
 }
+
+export type CartEntry = {
+  productId: number;
+  userId: number;
+  quantity?: number;
+}
