@@ -7,6 +7,7 @@ import ProductPhoto from "./product_photo";
 import ProductHistory from "./product_history";
 import Favorite from "./favorite";
 import Cart from "./cart";
+import Notification from "./notification";
 
 // 1:1 association between User and Seller
 User.hasOne(Seller);
@@ -50,4 +51,8 @@ User.hasMany(Cart);
 Cart.belongsTo(Product);
 Product.hasMany(Cart);
 
-export { User, Seller, Product, Category, Review, ProductPhoto, ProductHistory, Favorite, Cart };
+// 1:N association between Users and Notifications
+Notification.belongsTo(User);
+User.hasMany(Notification);
+
+export { User, Seller, Product, Category, Review, ProductPhoto, ProductHistory, Favorite, Cart, Notification };
