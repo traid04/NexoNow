@@ -11,6 +11,7 @@ import { tokenExtractor } from "../middleware/tokenExtractor";
 import { deletePhoto, fileFilter, uploadPhoto } from "../services/imagesService";
 import multer from 'multer';
 import { IDValidator } from "../middleware/IDValidator";
+import { tokenValidator } from "../middleware/tokenValidator";
 const router: Router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -100,15 +101,13 @@ router.post('/', upload.single('avatarPhoto'), async (req, res, next) => {
   }
 });
 
-router.patch('/me/change-avatar', tokenExtractor, upload.single('avatarPhoto'), async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Token missing or invalid" });
-  }
+router.patch('/me/change-avatar', tokenExtractor, tokenValidator, upload.single('avatarPhoto'), async (req: RequestWithUser, res, next) => {
   if (!req.file) {
     return res.status(400).json({ error: "New avatar photo required" });
   }
   try {
-    const user = await User.findByPk(req.user.userId);
+    const reqUser = req.user!;
+    const user = await User.findByPk(reqUser.userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -133,17 +132,15 @@ router.patch('/me/change-avatar', tokenExtractor, upload.single('avatarPhoto'), 
   }
 });
 
-router.delete('/me', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.delete('/me', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    if (isNaN(req.user.userId)) {
+    const reqUser = req.user!;
+    if (isNaN(reqUser.userId)) {
       return res.status(400).json({ error: 'Invalid User ID' });
     }
     const deletedCount = await User.destroy({
       where: {
-        id: req.user.userId
+        id: reqUser.userId
       }
     })
     if (deletedCount === 0) {
@@ -156,24 +153,22 @@ router.delete('/me', tokenExtractor, async (req: RequestWithUser, res, next) => 
   }
 });
 
-router.patch('/me', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.patch('/me', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const reqUser = req.user!;
     const newUpdate = parseUpdateBasicDataEntry(req.body);
     const [updatedCount] = await User.update(
       newUpdate,
       {
         where: {
-          id: req.user.userId
+          id: reqUser.userId
         }
       }
     )
     if (updatedCount === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    const userUpdated = await User.findByPk(req.user.userId, { attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"] });
+    const userUpdated = await User.findByPk(reqUser.userId, { attributes: ["id", "username", "firstName", "lastName", "birthDate", "email"] });
     return res.status(200).json(userUpdated);
   }
   catch(error) {
@@ -181,16 +176,14 @@ router.patch('/me', tokenExtractor, async (req: RequestWithUser, res, next) => {
   }
 });
 
-router.post('/me/change-email', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/me/change-email', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
   try {
+    const reqUser = req.user!;
     const newEmail = parseEmailChangeEntry(req.body).email;
-    const user = await User.findByPk(req.user.userId);
+    const user = await User.findByPk(reqUser.userId);
     if (!user || !('firstName' in user && 'email' in user)) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -228,16 +221,14 @@ router.get('/me/change-email/:token', async (req, res, next) => {
   }
 });
 
-router.post('/me/change-password', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/me/change-password', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   if (!JWT_TOP_SECRET_KEY) {
     return res.status(400).json({ error: "JWT secret key cannot be undefined" });
   }
   try {
+    const reqUser = req.user!;
     const newPassword = parsePasswordChangeEntry(req.body).password;
-    const user = await User.findByPk(req.user.userId);
+    const user = await User.findByPk(reqUser.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found, invalid Token' });
     }
@@ -339,12 +330,10 @@ router.post('/verify/expired', async (req, res, next) => {
   }
 });
 
-router.get('/me/product-history', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Token missing or invalid" });
-  }
+router.get('/me/product-history', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const user = await User.findByPk(req.user.userId);
+    const reqUser = req.user!;
+    const user = await User.findByPk(reqUser.userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -378,14 +367,12 @@ router.get('/me/product-history', tokenExtractor, async (req: RequestWithUser, r
   }
 });
 
-router.get('/me/favorites', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Token missing or invalid" });
-  }
+router.get('/me/favorites', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const reqUser = req.user!;
     const favs = await User.findOne({
       where: {
-        id: req.user.userId
+        id: reqUser.userId
       },
       include: {
         model: Product,
@@ -405,15 +392,13 @@ router.get('/me/favorites', tokenExtractor, async (req: RequestWithUser, res, ne
   }
 });
 
-router.get('/me/cart', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Token missing or invalid" });
-  }
+router.get('/me/cart', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const reqUser = req.user!;
     const cart = await Cart.findAll({
       order: [["createdAt", "DESC"]],
       where: {
-        userId: req.user.userId
+        userId: reqUser.userId
       },
       include: {
         model: Product,

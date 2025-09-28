@@ -4,6 +4,7 @@ import { tokenExtractor } from '../middleware/tokenExtractor';
 import { RequestWithUser } from '../types/types';
 import { IDValidator } from '../middleware/IDValidator';
 import { parseUpdateReviewEntry } from '../utils/parseInputs';
+import { tokenValidator } from '../middleware/tokenValidator';
 const router = express.Router();
 
 router.get('/', async (_req, res, next) => {
@@ -53,16 +54,14 @@ router.get('/:id', IDValidator, async (req, res, next) => {
 	}
 })
 
-router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-	if (!req.user) {
-		return res.status(401).json({ error: 'Token missing or invalid' });
-	}
+router.delete('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
 	try {
+		const reqUser = req.user!;
 		const reviewToDelete = await Review.findByPk(Number(req.params.id));
 		if (!reviewToDelete) {
 			return res.status(404).json({ error: 'Review not found' });
 		}
-		if (reviewToDelete.userId !== req.user.userId) {
+		if (reviewToDelete.userId !== reqUser.userId) {
 			return res.status(401).json({ error: "Cannot delete another user's review" });
 		}
 		await reviewToDelete.destroy();
@@ -73,16 +72,14 @@ router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, 
 	}
 });
 
-router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-	if (!req.user) {
-		return res.status(401).json({ error: 'Token missing or invalid' });
-	}
+router.patch('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
 	try {
+		const reqUser = req.user!;
 		const reviewToUpdate = await Review.findByPk(Number(req.params.id));
 		if (!reviewToUpdate) {
 			return res.status(404).json({ error: 'Review not found' })
 		}
-		if (req.user.userId !== reviewToUpdate.userId) {
+		if (reqUser.userId !== reviewToUpdate.userId) {
 			return res.status(401).json({ error: "Cannot update another user's review" });
 		}
 		const parsedUpdate = parseUpdateReviewEntry(req.body);

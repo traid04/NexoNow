@@ -3,16 +3,15 @@ import { tokenExtractor } from '../middleware/tokenExtractor';
 import { RequestWithUser } from '../types/types';
 import { Favorite } from '../models/index';
 import { IDValidator } from '../middleware/IDValidator';
+import { tokenValidator } from '../middleware/tokenValidator';
 
 const router = express.Router();
 
-router.post('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const reqUser = req.user!;
     const body = {
-      userId: req.user.userId,
+      userId: reqUser.userId,
       productId: Number(req.params.id)
     };
     const favorite = await Favorite.findOne({ where: body });
@@ -27,12 +26,10 @@ router.post('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, re
   }
 });
 
-router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.delete('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const favToRemove = await Favorite.findOne({ where: { userId: req.user.userId, productId: Number(req.params.id) } });
+    const reqUser = req.user!;
+    const favToRemove = await Favorite.findOne({ where: { userId: reqUser.userId, productId: Number(req.params.id) } });
     if (!favToRemove) {
       return res.status(404).json({ error: "Favorite not found" });
     }

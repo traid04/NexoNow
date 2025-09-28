@@ -4,13 +4,13 @@ import { IDValidator } from '../middleware/IDValidator';
 import { CartEntry, RequestWithUser } from '../types/types';
 import { parseNumber } from '../utils/parseInputs';
 import { Cart, Product } from '../models/index';
+import { tokenValidator } from '../middleware/tokenValidator';
+
 const router = express.Router();
 
-router.post('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const user = req.user!;
     const product = await Product.findByPk(Number(req.params.id));
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
@@ -21,13 +21,13 @@ router.post('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, re
     const productInCart = await Cart.findOne({
       where: {
         productId: Number(req.params.id),
-        userId: req.user.userId
+        userId: user.userId
       }
     });
     if (!productInCart) {
       const body: CartEntry = {
         productId: parseNumber(Number(req.params.id)),
-        userId: req.user.userId,
+        userId: user.userId,
         quantity: 1
       }
       const newProductInCart = await Cart.create(body);
@@ -45,14 +45,12 @@ router.post('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, re
   }
 });
 
-router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.delete('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const user = req.user!;
     const productInCart = await Cart.findOne({
       where: {
-        userId: req.user.userId,
+        userId: user.userId,
         productId: Number(req.params.id)
       }
     });
@@ -67,11 +65,9 @@ router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, 
   }
 });
 
-router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.patch('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const user = req.user!;
     const product = await Product.findByPk(Number(req.params.id));
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
@@ -81,7 +77,7 @@ router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, r
     }
     const productInCart = await Cart.findOne({
       where: {
-        userId: req.user.userId,
+        userId: user.userId,
         productId: Number(req.params.id)
       }
     });

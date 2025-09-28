@@ -5,6 +5,7 @@ import { tokenExtractor } from "../middleware/tokenExtractor";
 import { parseNewReviewEntry, parseNewSellerEntry, parseUpdateSellerDataEntry } from "../utils/parseInputs";
 import { NewReviewEntry, NewSellerEntry, RequestWithUser } from "../types/types";
 import { IDValidator } from "../middleware/IDValidator";
+import { tokenValidator } from "../middleware/tokenValidator";
 
 const router = express.Router();
 
@@ -49,12 +50,10 @@ router.get('/:id', IDValidator, async (req, res, next) => {
   }
 });
 
-router.post('/', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const newSeller: NewSellerEntry = parseNewSellerEntry({...req.body, userId: req.user.userId});
+    const reqUser = req.user!;
+    const newSeller: NewSellerEntry = parseNewSellerEntry({...req.body, userId: reqUser.userId});
     const insertSeller = await Seller.create(newSeller);
     return res.status(201).json(insertSeller);
   }
@@ -63,15 +62,13 @@ router.post('/', tokenExtractor, async (req: RequestWithUser, res, next) => {
   }
 });
 
-router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.delete('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const reqUser = req.user!;
     const deletedCount = await Seller.destroy({
       where: {
         id: Number(req.params.id),
-        userId: req.user.userId
+        userId: reqUser.userId
       }
     })
     if (deletedCount === 0) {
@@ -84,15 +81,13 @@ router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, 
   }
 });
 
-router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.patch('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
+    const reqUser = req.user!;
     const fieldsToUpdate = parseUpdateSellerDataEntry(req.body);
     const [updatedCount] = await Seller.update(fieldsToUpdate, {
       where: {
-        userId: req.user.userId,
+        userId: reqUser.userId,
         id: Number(req.params.id)
       }
     });
@@ -129,16 +124,14 @@ router.get('/:id/reviews', IDValidator, async (req, res, next) => {
   }
 });
 
-router.post('/:id/reviews', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/:id/reviews', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const hasReviews = await Review.findOne({ where: { userId: req.user.userId, sellerId: Number(req.params.id) } });
+    const reqUser = req.user!;
+    const hasReviews = await Review.findOne({ where: { userId: reqUser.userId, sellerId: Number(req.params.id) } });
     if (hasReviews) {
       return res.status(409).json({ error: 'User has already reviewed this seller' });
     }
-    const newReview: NewReviewEntry = parseNewReviewEntry({ ...req.body, userId: req.user.userId, sellerId: Number(req.params.id) });
+    const newReview: NewReviewEntry = parseNewReviewEntry({ ...req.body, userId: reqUser.userId, sellerId: Number(req.params.id) });
     if (newReview.rating < 1 || newReview.rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }

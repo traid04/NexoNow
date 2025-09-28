@@ -5,15 +5,14 @@ import { User } from '../models/index';
 import { MP_APP_ID } from '../utils/config';
 import { MP_REDIRECT_URL } from '../utils/config';
 import { v4 as uuidv4 } from 'uuid';
+import { tokenValidator } from '../middleware/tokenValidator';
 
 const router = express.Router();
 
-router.get('/', tokenExtractor, async (req: RequestWithUser, res) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Token missing or invalid" });
-  }
-  const uuid: string = `${uuidv4()}-${req.user.userId}`;
-  const user = await User.findByPk(req.user.userId);
+router.get('/', tokenExtractor, tokenValidator, async (req: RequestWithUser, res) => {
+  const reqUser = req.user!;
+  const uuid: string = `${uuidv4()}-${reqUser.userId}`;
+  const user = await User.findByPk(reqUser.userId);
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }

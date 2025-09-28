@@ -2,14 +2,13 @@ import express, { NextFunction, Response } from "express";
 import { tokenExtractor } from "../middleware/tokenExtractor";
 import { RequestWithUser } from "../types/types";
 import { User } from '../models/index';
+import { tokenValidator } from "../middleware/tokenValidator";
 const router = express.Router();
 
-router.post('/', tokenExtractor, async (req: RequestWithUser, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/', tokenExtractor, tokenValidator, async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findByPk(req.user.userId);
+    const reqUser = req.user!;
+    const user = await User.findByPk(reqUser.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found, invalid token' });
     }

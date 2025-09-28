@@ -3,14 +3,13 @@ import { Product, ProductHistory, User } from "../models";
 import express from 'express';
 import { RequestWithUser } from "../types/types";
 import { Op } from "sequelize";
+import { tokenValidator } from "../middleware/tokenValidator";
 const router = express.Router();
 
-router.get('/recommendations', tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Token missing or invalid" });
-  }
+router.get('/recommendations', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const user = await User.findByPk(req.user.userId);
+    const reqUser = req.user!;
+    const user = await User.findByPk(reqUser.userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

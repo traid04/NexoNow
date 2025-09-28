@@ -12,6 +12,7 @@ import { UploadApiResponse } from 'cloudinary';
 import { Op, Order, WhereOptions } from 'sequelize';
 import { USDToUYU } from '../services/exchangeService';
 import { optionalTokenExtractor } from '../middleware/optionalTokenExtractor';
+import { tokenValidator } from '../middleware/tokenValidator';
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 3 * 1024 * 1024 },
@@ -85,15 +86,13 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.post('/', upload.array('photos', 40), tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.post('/', upload.array('photos', 40), tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   if (!req.files) {
     return res.status(400).json({ error: 'At least 5 photos are required' })
   }
   try {
-    const seller = await Seller.findOne({ where: { userId: req.user.userId } });
+    const reqUser = req.user!;
+    const seller = await Seller.findOne({ where: { userId: reqUser.userId } });
     if (!seller) {
       return res.status(401).json({ error: 'Must create your Seller profile' });
     }
@@ -195,12 +194,10 @@ router.get('/:id', IDValidator, optionalTokenExtractor, async (req: RequestWithU
   }
 });
 
-router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.delete('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const seller = await Seller.findOne({ where: { userId: req.user.userId } });
+    const reqUser = req.user!;
+    const seller = await Seller.findOne({ where: { userId: reqUser.userId } });
     if (!seller) {
       return res.status(403).json({ error: "You cannot delete products from other sellers" });
     }
@@ -223,12 +220,10 @@ router.delete('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, 
   }
 });
 
-router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.patch('/:id', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
-    const seller = await Seller.findOne({ where: { userId: req.user.userId } });
+    const reqUser = req.user!;
+    const seller = await Seller.findOne({ where: { userId: reqUser.userId } });
     if (!seller) {
       return res.status(403).json({ error: "You cannot update products from other sellers" });
     }
@@ -270,10 +265,7 @@ router.patch('/:id', IDValidator, tokenExtractor, async (req: RequestWithUser, r
   }
 });
 
-router.patch('/:id/photos/:photoId', IDValidator, tokenExtractor, upload.single('photoToUpdate'), async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.patch('/:id/photos/:photoId', IDValidator, tokenExtractor, tokenValidator, upload.single('photoToUpdate'), async (req: RequestWithUser, res, next) => {
   if (!req.file) {
     return res.status(400).json({ error: 'New photo required' });
   }
@@ -299,10 +291,7 @@ router.patch('/:id/photos/:photoId', IDValidator, tokenExtractor, upload.single(
   }
 });
 
-router.patch('/:id/createOffer', IDValidator, tokenExtractor, async (req: RequestWithUser, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+router.patch('/:id/createOffer', IDValidator, tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
   try {
     const product = await Product.findByPk(Number(req.params.id));
     if (!product) {
