@@ -1,4 +1,4 @@
-import { Cart, Favorite, Product, ProductHistory, Seller, User } from "../models/index";
+import { Cart, Favorite, Notification, Product, ProductHistory, Seller, User } from "../models/index";
 import express, { Router } from "express";
 import { NewUserEntry, SecureNewUserEntry, NewVerifyUserEntry, RequestWithUser } from "../types/types";
 import { parseVerifyUserEntry, parseNewUserEntry, parseUpdateBasicDataEntry, parseEmailChangeEntry, parsePasswordChangeEntry, parseQueryParams } from "../utils/parseInputs";
@@ -407,6 +407,34 @@ router.get('/me/cart', tokenExtractor, tokenValidator, async (req: RequestWithUs
       attributes: { exclude: ["userId", "productId"] }
     });
     return res.status(200).json(cart);
+  }
+  catch(error) {
+    next(error);
+  }
+});
+
+router.get('/me/notifications', tokenExtractor, tokenValidator, async (req: RequestWithUser, res, next) => {
+  try {
+    const reqUser = req.user!;
+    const user = await User.findByPk(reqUser.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    let { offset } = parseQueryParams(req.query);
+    if (offset === undefined) {
+      offset = 0;
+    }
+    const { count, rows: notifications } = await Notification.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      limit: 10,
+      offset,
+      where: {
+        userId: reqUser.userId
+      }
+    });
+    const currentPage = Math.floor(offset / 10) + 1;
+    const totalPages = Math.ceil(count / 10);
+    return res.status(200).json({ notifications, total: count, currentPage, totalPages });
   }
   catch(error) {
     next(error);

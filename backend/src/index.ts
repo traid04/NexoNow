@@ -12,6 +12,7 @@ import mercadoPagoAuthRouter from "./routes/mercadoPagoAuth";
 import productHistoryRouter from "./routes/productHistory";
 import favoritesRouter from "./routes/favorites";
 import cartRouter from "./routes/cart";
+import notificationsRouter from "./routes/notifications";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 import { updateOffers } from "./jobs/offersJob";
@@ -33,6 +34,7 @@ app.use("/api/productHistory", productHistoryRouter);
 app.use("/api/oauth/mp", mercadoPagoAuthRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/notification", notificationsRouter);
 
 app.use(errorHandler);
 

@@ -136,3 +136,18 @@ export type CartEntry = {
   userId: number;
   quantity?: number;
 }
+
+export enum NotificationType {
+  info = "info",
+  success = "success",
+  warning = "warning",
+  error = "error",
+  alert = "alert",
+  system = "system",
+  message = "message"
+}
+
+export interface NewNotificationEntry {
+  text: string;
+  type: NotificationType;
+}

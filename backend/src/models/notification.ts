@@ -29,7 +29,7 @@ Notification.init(
       allowNull: false
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("info", "success", "warning", "error", "alert", "system", "message"),
       allowNull: false
     }
   },

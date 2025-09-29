@@ -1,4 +1,4 @@
-import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry, QueryParams, ProductCondition, ProductCurrency, OrderQuery, UpdateProductEntry, CreateOfferEntry } from "../types/types";
+import { NewVerifyUserEntry, NewUserEntry, LoginUserEntry, NewSellerEntry, UpdateBasicDataEntry, UpdateEmailEntry, UpdatePasswordEntry, UpdateSellerDataEntry, NewReviewEntry, UpdateReviewEntry, NewProductEntry, QueryParams, ProductCondition, ProductCurrency, OrderQuery, UpdateProductEntry, CreateOfferEntry, NewNotificationEntry, NotificationType } from "../types/types";
 import { isString, isDate, isNumber } from "./typeGuards";
 
 export const parseString = (str: unknown): string => {
@@ -44,6 +44,14 @@ const parseProductOrderQuery = (str: unknown): OrderQuery => {
     return parsedQuery as OrderQuery
   }
   throw new Error("Invalid Data: Invalid Order Query,")
+}
+
+const parseNotificationType = (str: unknown): NotificationType => {
+  const parsedType = parseString(str).toLowerCase();
+  if (parsedType === "info" || parsedType === "success" || parsedType === "warning" || parsedType === "error" || parsedType === "alert" || parsedType === "system" || parsedType === "message") {
+    return parsedType as NotificationType;
+  }
+  throw new Error("Invalid Data: Invalid Notification Type");
 }
 
 export const parseNewUserEntry = (user: unknown): NewUserEntry => {
@@ -316,4 +324,17 @@ export const parseCreateOfferEntry = (entry: unknown): CreateOfferEntry => {
     startOfferDate: parseString(entry.startOfferDate),
     endOfferDate: parseString(entry.endOfferDate)
   }
+}
+
+export const parseNewNotificationEntry = (entry: unknown): NewNotificationEntry => {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error('Invalid Data: Object expected');
+  }
+  if ('text' in entry && 'type' in entry) {
+    return {
+      text: parseString(entry.text),
+      type: parseNotificationType(entry.type)
+    }
+  }
+  throw new Error('Invalid Data: Some Fields are missing');
 }
