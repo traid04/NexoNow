@@ -21,8 +21,6 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser(COOKIE_TOP_SECRET_KEY));
 
-updateOffers();
-
 app.use("/api/users", userRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/refresh", refreshRouter);
@@ -38,12 +36,17 @@ app.use("/api/notification", notificationsRouter);
 
 app.use(errorHandler);
 
-app.listen(PORT, async () => {
-  try {
-    await initializeDB();
-  }
-  catch (error) {
-    console.log(error);
-  }
-  console.log(`Listening to PORT: ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  updateOffers();
+  app.listen(PORT, async () => {
+    try {
+      await initializeDB();
+    }
+    catch (error) {
+      console.log(error);
+    }
+    console.log(`Listening to PORT: ${PORT}`);
+  });
+}
+
+export { app };

@@ -1,12 +1,14 @@
-import { DB_URI } from '../utils/config';
+import { DB_URI, TEST_DB_URI } from '../utils/config';
 import { Sequelize } from 'sequelize';
 import { Umzug, SequelizeStorage } from 'umzug';
 
-if (!DB_URI) {
+const uri = process.env.NODE_ENV === "test" ? TEST_DB_URI : DB_URI;
+
+if (uri === undefined) {
   throw new Error('Undefined Database');
 }
 
-export const sequelize : Sequelize = new Sequelize(DB_URI);
+export const sequelize : Sequelize = new Sequelize(uri);
 
 const umzug = new Umzug({
   migrations: { glob: './src/migrations/*.js' },
