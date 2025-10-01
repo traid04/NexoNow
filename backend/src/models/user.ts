@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../utils/db";
+import { Seller } from "./index";
 
 class User extends Model {
   declare id: number;
@@ -18,6 +19,7 @@ class User extends Model {
   declare mpRefreshToken: string;
   declare mpTokenExpiration: string;
   declare mpState: string;
+  declare seller: Seller;
 }
 
 User.init(
@@ -89,7 +91,7 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true
     },
-    mp_state: {
+    mpState: {
       type: DataTypes.STRING,
       allowNull: true
     }

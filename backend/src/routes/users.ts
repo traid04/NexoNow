@@ -66,13 +66,16 @@ router.post('/', upload.single('avatarPhoto'), async (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: "The profile picture is required" });
     }
-    const avatar = await uploadPhoto(req.file);
-    if (!avatar) {
-      return res.status(400).json({ error: "Error uploading profile picture" })
-    }
     const userEntry: NewUserEntry = parseNewUserEntry(req.body);
+    if (userEntry.password.length < 8) {
+      return res.status(400).json({ error: "The password must be at least 8 characters" });
+    }
     const passwordHash = await bcrypt.hash(userEntry.password, 10);
     const verifyToken = jsonwebtoken.sign({ email: userEntry.email }, JWT_TOP_SECRET_KEY, { expiresIn: '1d' });
+    const avatar = await uploadPhoto(req.file);
+    if (!avatar) {
+      return res.status(400).json({ error: "Error uploading profile picture" });
+    }
     const userToAdd = {
       avatarId: avatar.public_id,
       avatarPhoto: avatar.secure_url,
@@ -142,7 +145,7 @@ router.delete('/me', tokenExtractor, tokenValidator, async (req: RequestWithUser
       where: {
         id: reqUser.userId
       }
-    })
+    });
     if (deletedCount === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -189,7 +192,7 @@ router.post('/me/change-email', tokenExtractor, tokenValidator, async (req: Requ
     }
     const token = jsonwebtoken.sign({ username: user.username, actualEmail:user.email, newEmail }, JWT_TOP_SECRET_KEY, { expiresIn: '10m' });
     await sendChangeMail(user.firstName, user.email, token, 'changeEmail');
-    return res.status(200).json({ message: 'Change email successfully sent' });
+    return res.status(200).json({ message: 'Update data email successfully sent' });
   }
   catch(error) {
     next(error);

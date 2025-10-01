@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jsonwebtoken from "jsonwebtoken";
-import { UniqueConstraintError } from "sequelize";
+import { UniqueConstraintError, ValidationError } from "sequelize";
 
 export const errorHandler = (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof jsonwebtoken.TokenExpiredError) {
@@ -12,6 +12,10 @@ export const errorHandler = (error: unknown, _req: Request, res: Response, _next
   if (error instanceof UniqueConstraintError) {
     const errors = error.errors.map(e => e.message);
     return res.status(400).json({ error: errors });
+  }
+  if (error instanceof ValidationError) {
+    const errors = error.errors.map(e => `${e.path} is invalid`);
+    return res.status(400).json({ error: errors })
   }
   if (error instanceof Error) {
     return res.status(409).json({ error: error.message });
