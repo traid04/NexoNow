@@ -32,7 +32,7 @@ beforeAll(async () => {
     birthDate: "09-30-2025",
     password: "secondtest"
   };
-  await createUser(api, secondUserBody);
+  await createUser(api, secondUserBody)
   const secondUser = await User.findOne({ where: { username: secondUserBody.username } });
   secondUser!.isVerified = true;
   await secondUser!.save();
@@ -40,11 +40,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const users = await User.findAll();
-  await User.destroy({
-    where: {
-      email: ["firstAccountInDB@yopmail.com", "testAcc@yopmail.com", "secondAccountInDB@yopmail.com"]
-    }
-  });
+  await User.destroy({ where: { } });
   for (const u of users) {
     await deletePhoto(u.avatarId);
   }

@@ -35,9 +35,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await User.destroy({
-    where: {
-      email: ["supertest@gmail.com", "verifiedMail@hotmail.com"]
-    }
+    where: { }
   });
   await sequelize.close();
 });
