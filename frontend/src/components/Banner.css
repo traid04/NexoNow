@@ -1,0 +1,165 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  background-color: #4d32b8;
+  height: 5rem;
+  width: 100%;
+}
+
+.banner-logo {
+  max-width: 100%;
+  height: 4rem;
+  width: 4rem;
+}
+
+.banner-searchbar {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-searchbar-text {
+  border: none;
+  outline: none;
+  flex: 1;
+  height: 1.5rem;
+  border-radius: 4px;
+  padding-left: 0.5rem;
+  min-width: 0;
+  font-size: 0.6rem;
+}
+
+.banner-searchbar-submit {
+  margin-left: 0.1rem;
+  height: 1.5rem;
+  min-width: 0;
+  border: none;
+  border-radius: 4px;
+}
+
+.banner-nav {
+  display: flex;
+  margin-left: auto;
+}
+
+.banner-nav-menu,
+.banner-nav-menu-close {
+  min-width: 0;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: white;
+}
+
+.banner-nav-login,
+.banner-nav-register {
+  display: none;
+}
+
+.banner-mobile-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5px;
+  width: 100%;
+  background-color: #4d32b8;
+  padding: 5px;
+  color: white;
+}
+
+.banner-mobile-login,
+.banner-mobile-register,
+.banner-mobile-categories {
+  color: white;
+  text-decoration: none;
+  margin-bottom: 0.4rem;
+  font-size: 0.7rem;
+  min-height: 0;
+}
+
+.banner-mobile-categories {
+  margin-top: 0.4rem;
+}
+
+.banner-nav-btn {
+  position: relative;
+  border: none;
+  background-color: transparent;
+  margin: 0.5rem;
+  width: 1.5rem;
+  height: 1.4rem;
+}
+
+.first-line,
+.second-line,
+.third-line {
+  width: 15px;
+  height: 2px;
+  background-color: white;
+}
+
+.first-line {
+  transition-duration: 0.3s;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.second-line {
+  transition-duration: 0.3s;
+  position: absolute;
+  right: 5px;
+}
+
+.banner-nav-btn .third-line {
+  transition-duration: 0.3s;
+  position: absolute;
+  bottom: 3px;
+  right: 5px;
+}
+
+.banner-nav-btn.open .first-line {
+  transition-duration: 0.3s;
+  top: 10px;
+  transform: rotate(45deg);
+  width: 18px;
+}
+
+.banner-nav-btn.open .second-line {
+  transition-duration: 0.3s;
+  opacity: 0;
+}
+
+.banner-nav-btn.open .third-line {
+  transition-duration: 0.3s;
+  bottom: 10px;
+  transform: rotate(-45deg);
+  width: 18px;
+}
+
+
+@media screen and (min-width: 768px) {
+
+  .banner-nav-login,
+  .banner-nav-register,
+  .banner-nav-categories {
+    color: white;
+  }
+
+  .banner-nav-btn,
+  .banner-mobile-menu {
+    display: none;
+  }
+}
