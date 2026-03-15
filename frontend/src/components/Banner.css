@@ -32,7 +32,7 @@ body {
   border: none;
   outline: none;
   flex: 1;
-  height: 1.5rem;
+  height: 2rem;
   border-radius: 4px;
   padding-left: 0.5rem;
   min-width: 0;
@@ -41,7 +41,7 @@ body {
 
 .banner-searchbar-submit {
   margin-left: 0.1rem;
-  height: 1.5rem;
+  height: 2rem;
   min-width: 0;
   border: none;
   border-radius: 4px;
@@ -63,7 +63,9 @@ body {
 }
 
 .banner-nav-login,
-.banner-nav-register {
+.banner-nav-register,
+.banner-nav-categories,
+.banner-nav-offers {
   display: none;
 }
 
@@ -150,16 +152,63 @@ body {
 }
 
 
-@media screen and (min-width: 768px) {
-
-  .banner-nav-login,
-  .banner-nav-register,
-  .banner-nav-categories {
-    color: white;
-  }
+@media screen and (min-width: 821px) {
 
   .banner-nav-btn,
   .banner-mobile-menu {
     display: none;
+  }
+
+  .banner {
+    justify-content: center;
+  }
+
+  .banner-searchbar {
+    min-width: 0;
+    justify-content: center;
+    flex: none;
+    margin-right: 3rem;
+    margin-left: 3rem;
+  }
+
+  .banner-searchbar-text {
+    min-width: 0;
+    width: 30vw;
+    height: 3rem;
+    font-size: 1rem;
+    padding-left: 1rem;
+  }
+
+  .banner-searchbar-submit:hover {
+    cursor: pointer;
+  }
+
+  .banner-searchbar-submit {
+    min-width: 0;
+    font-size: 1.3rem;
+    margin-left: 2px;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .banner-nav {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .banner-nav-login,
+  .banner-nav-register,
+  .banner-nav-categories,
+  .banner-nav-offers {
+    color: white;
+    display: block;
+    margin-right: 2rem;
+    text-decoration: none;
+  }
+
+  .banner-nav-categories-arrow {
+    position: relative;
+    font-size: 0.8rem;
+    top: 3px;
   }
 }

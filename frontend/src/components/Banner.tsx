@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { VscSearch } from "react-icons/vsc";
+import { IoIosArrowDown } from "react-icons/io";
 import { Link } from "react-router-dom";
 import "./Banner.css";
 
@@ -26,7 +27,8 @@ const Banner = () => {
             <span className="second-line"></span>
             <span className="third-line"></span>
           </button>
-          <Link to="/categories" className="banner-nav-categories">Categorias</Link>
+          <Link to="/offers" className="banner-nav-offers">Ofertas</Link>
+          <Link to="/categories" className="banner-nav-categories">Categorias <IoIosArrowDown className="banner-nav-categories-arrow" /></Link>
           <Link to="/login" className="banner-nav-login">Ingresa</Link>
           <Link to="/register" className="banner-nav-register">Regístrate</Link>
         </nav>
