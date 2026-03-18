@@ -151,6 +151,50 @@ body {
   width: 18px;
 }
 
+.banner-nav-categories-container {
+  position: relative;
+}
+
+.banner-nav-categories-container::after {
+  content: "";
+  position: absolute;
+  width: 6rem;
+  height: 10px;
+}
+
+.banner-categories::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 2.5rem;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #3a2590;
+}
+
+.banner-categories {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  right: 10px;
+  position: absolute;
+  background-color: #3a2590;
+  justify-content: center;
+}
+
+.banner-categories-list {
+  list-style: none;
+}
+
+.banner-categories-list-category {
+  text-align: center;
+  text-decoration: none;
+  margin: 20px;
+  margin-bottom: 40px;
+  color: white;
+}
+
 
 @media screen and (min-width: 821px) {
 

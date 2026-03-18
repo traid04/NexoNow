@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VscSearch } from "react-icons/vsc";
 import { IoIosArrowDown } from "react-icons/io";
 import { Link } from "react-router-dom";
+import getCategories from "../services/categoriesService";
 import "./Banner.css";
+import type { Category } from "../types/types";
+import { toSlug } from "../helpers/toSlug";
 
 const Banner = () => {
   const [menu, setMenu] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [categoriesData, setCategoriesData] = useState([]);
 
-  const menuHandler = () => {
+  const handleMenu = () => {
     setMenu(!menu);
   }
+
+  useEffect(() => {
+    const fetchCategories = (async () => {
+      const c = await getCategories();
+      setCategoriesData(c);
+    });
+    fetchCategories();
+  }, []);
 
   return (
     <>
@@ -22,13 +35,21 @@ const Banner = () => {
           <button className="banner-searchbar-submit"><VscSearch /></button>
         </div>
         <nav className="banner-nav">
-          <button className={`banner-nav-btn ${menu ? "open" : ""}`} onClick={menuHandler}>
+          <button className={`banner-nav-btn ${menu ? "open" : ""}`} onClick={handleMenu}>
             <span className="first-line"></span>
             <span className="second-line"></span>
             <span className="third-line"></span>
           </button>
           <Link to="/offers" className="banner-nav-offers">Ofertas</Link>
-          <Link to="/categories" className="banner-nav-categories">Categorias <IoIosArrowDown className="banner-nav-categories-arrow" /></Link>
+          <div className="banner-nav-categories-container" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+            <Link to="/categories" className="banner-nav-categories">Categorias <IoIosArrowDown className="banner-nav-categories-arrow" /></Link>
+            {isHovered && <nav className="banner-categories">
+              <ul className="banner-categories-list">
+                {categoriesData.map((c: Category) => <li key={c.id}>
+                  <Link to={`/categories/${toSlug(c.name)}`} className="banner-categories-list-category">{c.name}</Link></li>)}
+              </ul>
+            </nav>}
+          </div>
           <Link to="/login" className="banner-nav-login">Ingresa</Link>
           <Link to="/register" className="banner-nav-register">Regístrate</Link>
         </nav>

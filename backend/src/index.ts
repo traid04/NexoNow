@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { PORT, COOKIE_TOP_SECRET_KEY } from "./utils/config";
 import { initializeDB } from "./utils/db";
 import userRouter from "./routes/users";
@@ -13,6 +14,7 @@ import productHistoryRouter from "./routes/productHistory";
 import favoritesRouter from "./routes/favorites";
 import cartRouter from "./routes/cart";
 import notificationsRouter from "./routes/notifications";
+import categoriesRouter from "./routes/categories";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 import { updateOffers } from "./jobs/offersJob";
@@ -21,6 +23,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser(COOKIE_TOP_SECRET_KEY));
 
+app.use(cors());
 app.use("/api/users", userRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/refresh", refreshRouter);
@@ -33,6 +36,7 @@ app.use("/api/oauth/mp", mercadoPagoAuthRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/notification", notificationsRouter);
+app.use("/api/categories", categoriesRouter);
 
 app.use(errorHandler);
 
