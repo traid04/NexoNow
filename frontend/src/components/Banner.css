@@ -151,50 +151,6 @@ body {
   width: 18px;
 }
 
-.banner-nav-categories-container {
-  position: relative;
-}
-
-.banner-nav-categories-container::after {
-  content: "";
-  position: absolute;
-  width: 6rem;
-  height: 10px;
-}
-
-.banner-categories::before {
-  content: "";
-  position: absolute;
-  top: -8px;
-  right: 2.5rem;
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 8px solid #3a2590;
-}
-
-.banner-categories {
-  margin-top: 8px;
-  font-size: 0.8rem;
-  right: 10px;
-  position: absolute;
-  background-color: #3a2590;
-  justify-content: center;
-}
-
-.banner-categories-list {
-  list-style: none;
-}
-
-.banner-categories-list-category {
-  text-align: center;
-  text-decoration: none;
-  margin: 20px;
-  margin-bottom: 40px;
-  color: white;
-}
-
 
 @media screen and (min-width: 821px) {
 
@@ -254,5 +210,67 @@ body {
     position: relative;
     font-size: 0.8rem;
     top: 3px;
+  }
+
+  .banner-nav-categories-container {
+    position: relative;
+    display: flex;
+  }
+
+  .banner-nav-categories-container::after {
+    content: "";
+    position: absolute;
+    width: 6rem;
+    height: 10px;
+    top: 20px;
+  }
+
+  .banner-categories::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    right: 2.5rem;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #384d69;
+  }
+
+  .banner-categories {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-top: 1.8rem;
+    font-size: 0.8rem;
+    right: 10px;
+    position: absolute;
+    background-color: #384d69;
+  }
+
+  .banner-categories-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .banner-categories-list-category {
+    display: flex;
+    margin-bottom: 0.1rem;
+    padding: 0.45rem;
+    width: 250px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .banner-categories-list-category:hover {
+    background-color: #33333f;
+  }
+
+  .banner-categories-list-category-font {
+    text-decoration: none;
+    color: white;
+    font-style: bold;
   }
 }

@@ -42,11 +42,11 @@ const Banner = () => {
           </button>
           <Link to="/offers" className="banner-nav-offers">Ofertas</Link>
           <div className="banner-nav-categories-container" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-            <Link to="/categories" className="banner-nav-categories">Categorias <IoIosArrowDown className="banner-nav-categories-arrow" /></Link>
+            <Link to="/" className="banner-nav-categories">Categorias <IoIosArrowDown className="banner-nav-categories-arrow" /></Link>
             {isHovered && <nav className="banner-categories">
               <ul className="banner-categories-list">
-                {categoriesData.map((c: Category) => <li key={c.id}>
-                  <Link to={`/categories/${toSlug(c.name)}`} className="banner-categories-list-category">{c.name}</Link></li>)}
+                {categoriesData.map((c: Category) => <li key={c.id} className="banner-categories-list-category">
+                  <Link to={`/categories/${toSlug(c.name)}`} className="banner-categories-list-category-font">{c.name}</Link></li>)}
               </ul>
             </nav>}
           </div>
